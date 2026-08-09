@@ -127,7 +127,11 @@ def _build_one(
     bitrate_kbps = int(preset["bitrate_kbps"])
     crf = int(preset["crf"])
     caption_mode = _caption_mode_for_style(candidate.caption_style, renderer)
-    crop_mode = _crop_mode_for_renderer(candidate.crop_strategy, renderer)
+    crop_mode = _crop_mode_for_renderer(
+        candidate.crop_strategy,
+        renderer,
+        aspect_ratio=variant.aspect_ratio,
+    )
     watermark = variant.watermark and "watermark" in cap.capabilities
     watermark_text: str | None = None
     watermark_position: str = "bottom-right"
@@ -264,9 +268,11 @@ def _caption_mode_for_style(style: CaptionStyle, renderer: str) -> CaptionMode:
     return "off"
 
 
-def _crop_mode_for_renderer(crop_mode, renderer):  # noqa: ANN001
-    """Downcast crop_mode to renderer-supported. Falls back to center."""
+def _crop_mode_for_renderer(crop_mode, renderer, *, aspect_ratio: str = "16:9"):  # noqa: ANN001
+    """Resolve crop mode, enforcing smart fill for every vertical variant."""
     cap = get_renderer(renderer)
+    if aspect_ratio == "9:16" and "smart" in cap.supported_crop_modes:
+        return "smart"
     if crop_mode in cap.supported_crop_modes:
         return crop_mode
     if "center" in cap.supported_crop_modes:

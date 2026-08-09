@@ -1,29 +1,22 @@
 """Persist RenderJob + RenderOutput rows + emit render lifecycle usage events.
 
 Also records Stripe meter events for GPU seconds (Sprint 3 metered billing).
-"""
-from __future__ import annotations
-
-import logging
 
 Used by:
 - workers.render_worker (after the adapter returns)
 - the phase-5 local probe (drives the same path without Modal)
 
 Lifecycle:
-  1. `start_render_job(...)`  → INSERT RenderJob (status=rendering) + emit RENDER_STARTED
-  2. (adapter executes the render)
-  3a. on success: `complete_render_job(...)` → UPDATE RenderJob (status=succeeded)
-       + INSERT RenderOutput + emit RENDER_COMPLETED
-  3b. on failure: `fail_render_job(...)` → UPDATE RenderJob (status=failed)
-       + emit JOB_FAILED
+  1. start_render_job inserts a queued row and transitions it to rendering.
+  2. The adapter executes the render.
+  3. complete_render_job or fail_render_job records the terminal result.
 
 This split lets the worker emit RENDER_STARTED before kicking off a long
 ffmpeg subprocess, so dashboard queries reflect in-flight work.
 """
-
 from __future__ import annotations
 
+import logging
 import uuid
 from datetime import datetime, timezone
 

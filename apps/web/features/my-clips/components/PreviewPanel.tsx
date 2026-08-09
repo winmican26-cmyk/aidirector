@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { cn } from "@/features/design-system/utils/cn";
 import {
   Button,
@@ -10,6 +10,7 @@ import {
   AppIcon,
   BottomSheet,
 } from "@/features/design-system";
+import { toast } from "@/stores/toast-store";
 import type { Clip } from "../types";
 
 interface PreviewPanelProps {
@@ -32,6 +33,37 @@ export const PreviewPanel = memo(function PreviewPanel({
   onClose,
   onDownload,
 }: PreviewPanelProps) {
+  const shareUrl = typeof window === "undefined"
+    ? ""
+    : clip
+      ? `${window.location.origin}/app/clips?clip=${encodeURIComponent(clip.id)}`
+      : "";
+
+  const handleShare = useCallback(async () => {
+    if (!shareUrl) return;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: clip?.title ?? "AI Director clip", url: shareUrl });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success("Link copied", "The clip link is ready to share.");
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      toast.error("Share failed", "Copy the link instead or try again.");
+    }
+  }, [clip?.title, shareUrl]);
+
+  const handleCopyLink = useCallback(async () => {
+    if (!shareUrl) return;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Link copied", "The clip link is ready to share.");
+    } catch {
+      toast.error("Copy failed", "Your browser did not allow clipboard access.");
+    }
+  }, [shareUrl]);
+
   if (!clip) return null;
 
   return (
@@ -40,41 +72,42 @@ export const PreviewPanel = memo(function PreviewPanel({
       onClose={onClose}
       title={clip.title}
     >
-      {/* Large preview placeholder */}
-      <div className="aspect-video rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 border border-slate-100 flex items-center justify-center mb-6">
-        <div className="text-center">
-          <AppIcon
-            name="play"
-            size="2xl"
-            className="text-slate-300 mx-auto mb-2"
-          />
-          <span className="text-xs font-medium text-slate-400">
-            {clip.duration}
-          </span>
-        </div>
+      <div className="aspect-video rounded-xl overflow-hidden bg-[color:var(--color-surface-3)] border border-[color:var(--color-border-soft)] mb-6">
+        {clip.videoUrl ? (
+          <video className="h-full w-full object-contain" src={clip.videoUrl} controls playsInline preload="metadata">
+            Your browser does not support video playback.
+          </video>
+        ) : (
+          <div className="h-full flex items-center justify-center">
+            <div className="text-center">
+              <AppIcon name="play" size="2xl" className="text-[color:var(--color-text-muted)] mx-auto mb-2" />
+              <span className="text-xs font-medium text-[color:var(--color-text-tertiary)]">Preview unavailable</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Info grid */}
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div>
-          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+          <span className="text-xs font-medium text-[color:var(--color-text-tertiary)] uppercase tracking-wider">
             Duration
           </span>
-          <p className="text-sm font-semibold text-slate-900 mt-0.5">
+          <p className="text-sm font-semibold text-[color:var(--color-text-primary)] mt-0.5">
             {clip.duration}
           </p>
         </div>
         <div>
-          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+          <span className="text-xs font-medium text-[color:var(--color-text-tertiary)] uppercase tracking-wider">
             Quality Score
           </span>
-          <p className="text-sm font-semibold text-slate-900 mt-0.5 flex items-center gap-1">
-            <span className="text-amber-500">&#9733;</span>
+          <p className="text-sm font-semibold text-[color:var(--color-text-primary)] mt-0.5 flex items-center gap-1">
+            <span className="text-[color:var(--color-accent-gold)]">&#9733;</span>
             {clip.score.toFixed(1)}
           </p>
         </div>
         <div>
-          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+          <span className="text-xs font-medium text-[color:var(--color-text-tertiary)] uppercase tracking-wider">
             Status
           </span>
           <div className="mt-1">
@@ -82,10 +115,10 @@ export const PreviewPanel = memo(function PreviewPanel({
           </div>
         </div>
         <div>
-          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+          <span className="text-xs font-medium text-[color:var(--color-text-tertiary)] uppercase tracking-wider">
             Created
           </span>
-          <p className="text-sm text-slate-900 mt-0.5">
+          <p className="text-sm text-[color:var(--color-text-primary)] mt-0.5">
             {clip.createdAt}
           </p>
         </div>
@@ -93,7 +126,7 @@ export const PreviewPanel = memo(function PreviewPanel({
 
       {/* Platforms */}
       <div className="mb-6">
-        <span className="text-xs font-medium text-slate-400 uppercase tracking-wider block mb-2">
+        <span className="text-xs font-medium text-[color:var(--color-text-tertiary)] uppercase tracking-wider block mb-2">
           Platforms
         </span>
         <div className="flex flex-wrap gap-1.5">
@@ -104,8 +137,8 @@ export const PreviewPanel = memo(function PreviewPanel({
       </div>
 
       {/* Description / filename */}
-      <div className="mb-6 p-3 rounded-xl bg-slate-50 border border-slate-100">
-        <p className="text-xs text-slate-500 leading-relaxed">
+      <div className="mb-6 p-3 rounded-xl bg-[color:var(--color-surface-2)] border border-[color:var(--color-border-soft)]">
+        <p className="text-xs text-[color:var(--color-text-secondary)] leading-relaxed">
           AI-generated clip from your video. Optimised for vertical viewing
           on social platforms.
         </p>
@@ -127,9 +160,7 @@ export const PreviewPanel = memo(function PreviewPanel({
             size="md"
             variant="secondary"
             className="w-full"
-            onClick={() => {
-              // Placeholder: wire up sharing
-            }}
+            onClick={() => void handleShare()}
           >
             <AppIcon name="externalLink" size="sm" />
             Share
@@ -138,9 +169,7 @@ export const PreviewPanel = memo(function PreviewPanel({
             size="md"
             variant="secondary"
             className="w-full"
-            onClick={() => {
-              // Placeholder: copy link
-            }}
+            onClick={() => void handleCopyLink()}
           >
             <AppIcon name="link" size="sm" />
             Copy Link

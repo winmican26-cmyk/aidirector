@@ -141,6 +141,11 @@ class TestVideoFilters:
         assert any("crop=" in f for f in filters), "Expected crop= filter for action mode"
         assert not any("pad=" in f for f in filters), "No pad= expected for action mode"
 
+    def test_smart_crop_fills_vertical_frame(self, tmp_path: Path):
+        filters = self._cmd(tmp_path, crop_mode="smart")
+        assert any("crop=" in f for f in filters)
+        assert not any("pad=" in f for f in filters)
+
     def test_crop_filter_dimensions_are_even(self, tmp_path: Path):
         """Crop dimensions must be even numbers for yuv420p compatibility."""
         filters = self._cmd(tmp_path, crop_mode="center")

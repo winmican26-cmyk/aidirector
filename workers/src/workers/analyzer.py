@@ -13,13 +13,14 @@ from workers.modal_app import app, intel_image, secrets
 
 @app.function(image=intel_image, secrets=secrets, timeout=1800, memory=8192)
 def analyze_scene(job_id: str, upload_r2_key: str) -> dict[str, str]:
-    """Stub — to be implemented in Phase 1.
+    """Compatibility entrypoint delegating to the canonical scene worker."""
+    from workers.scene_analysis_worker import analyze_video
 
-    Steps:
-      1. Download R2 object at upload_r2_key to /tmp.
-      2. Build PipelineConfig from settings + tenant overrides.
-      3. Instantiate FootballPipelineOrchestrator and call run_full_pipeline.
-      4. Read the per-job workspace artifacts, write scenes rows to Postgres.
-      5. Return scene_count so the control plane can enqueue the Director.
-    """
-    raise NotImplementedError("Phase 1 — see plan §9")
+    local_call = getattr(analyze_video, "local", analyze_video)
+    result = local_call(job_id, upload_r2_key, "football")
+    return {
+        "job_id": str(result.get("job_id", job_id)),
+        "status": str(result.get("status", "unknown")),
+        "scenes": str(result.get("scenes", 0)),
+        "candidates": str(result.get("candidates", 0)),
+    }

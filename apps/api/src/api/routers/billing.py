@@ -15,13 +15,11 @@ from api.services.billing import (
     get_or_create_customer,
     get_subscription_status,
 )
+from api.config import get_settings
 
 log = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/billing", tags=["billing"])
-
-_RETURN_URL_DEFAULT = "http://localhost:3001/app/settings/billing"
-
 
 class PortalResponse(BaseModel):
     url: str
@@ -51,7 +49,7 @@ def portal(tenant: TenantRow) -> PortalResponse:
     )
     url = create_billing_portal_session(
         customer_id=customer_id,
-        return_url=_RETURN_URL_DEFAULT,
+        return_url=f"{get_settings().app_base_url.rstrip('/')}/app/settings/billing",
     )
     return PortalResponse(url=url)
 

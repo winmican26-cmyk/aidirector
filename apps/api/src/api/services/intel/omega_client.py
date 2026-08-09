@@ -25,9 +25,9 @@ def _find_repo_root() -> Path:
         if parent == current:
             break
         current = parent
-    # Last-resort fallback: the old known relative depth. This survives
-    # in case the .git dir isn't available (e.g. git-worktree, shallow clone).
-    return Path(__file__).resolve().parents[6]
+    # The container image intentionally does not include the optional intel
+    # submodule. Use its runtime root so health/import paths remain safe.
+    return Path("/app")
 
 
 _INTEL_DIR = _find_repo_root() / "packages" / "intel"

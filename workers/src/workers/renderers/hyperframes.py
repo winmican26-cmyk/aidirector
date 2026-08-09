@@ -24,5 +24,7 @@ hyperframes_image = (
     memory=16384,
 )
 def render_hyperframes(job_id: str, scene_id: str, params: dict) -> dict:
-    """Stub — Phase 3."""
-    raise NotImplementedError("Phase 3")
+    """Use the validated CPU adapter until a dedicated GPU renderer is enabled."""
+    from workers.renderers._adapter import render_manifest
+
+    return render_manifest(params)

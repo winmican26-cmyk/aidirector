@@ -98,6 +98,7 @@ export function Toaster() {
               </div>
               <button
                 onClick={() => remove(t.id)}
+                aria-label="Dismiss notification"
                 className="shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-[color:var(--color-text-tertiary)] hover:text-[color:var(--color-text-primary)] hover:bg-[color:var(--color-surface-3)] transition-colors"
               >
                 <X className="h-3 w-3" strokeWidth={2} />

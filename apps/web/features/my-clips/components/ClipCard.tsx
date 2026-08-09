@@ -38,27 +38,24 @@ export const ClipCard = memo(function ClipCard({
       onClick={() => onPreview(clip)}
       className={cn("flex flex-col", className)}
     >
-      {/* Thumbnail placeholder */}
-      <div className="aspect-video rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 border border-slate-100 flex items-center justify-center mb-4 overflow-hidden">
-        <div className="text-center">
-          <AppIcon
-            name="film"
-            size="2xl"
-            className="text-slate-300 mx-auto mb-1"
-          />
-          <span className="text-[11px] font-medium text-slate-400 block">
-            {clip.duration}
-          </span>
-        </div>
+      <div className="aspect-video rounded-xl bg-[color:var(--color-surface-3)] border border-[color:var(--color-border-soft)] flex items-center justify-center mb-4 overflow-hidden">
+        {clip.thumbnailUrl ? (
+          <img src={clip.thumbnailUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+        ) : (
+          <div className="text-center">
+            <AppIcon name="film" size="2xl" className="text-[color:var(--color-text-muted)] mx-auto mb-1" />
+            <span className="text-[11px] font-medium text-[color:var(--color-text-tertiary)] block">{clip.duration}</span>
+          </div>
+        )}
       </div>
 
       {/* Title + score row */}
       <div className="flex items-start justify-between gap-2 mb-3">
-        <h3 className="text-sm font-semibold text-slate-900 leading-snug">
+        <h3 className="text-sm font-semibold text-[color:var(--color-text-primary)] leading-snug">
           {clip.title}
         </h3>
-        <span className="shrink-0 flex items-center gap-1 text-xs font-semibold text-slate-700 bg-slate-100 rounded-md px-1.5 py-0.5">
-          <span className="text-amber-500">&#9733;</span>
+        <span className="shrink-0 flex items-center gap-1 text-xs font-semibold text-[color:var(--color-text-secondary)] bg-[color:var(--color-surface-2)] rounded-md px-1.5 py-0.5">
+          <span className="text-[color:var(--color-accent-gold)]">&#9733;</span>
           {clip.score.toFixed(1)}
         </span>
       </div>
@@ -101,16 +98,6 @@ export const ClipCard = memo(function ClipCard({
           <AppIcon name="download" size="sm" />
           Download
         </Button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            // Future: open context menu
-          }}
-          className="rounded-lg p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-          aria-label={`More options for ${clip.title}`}
-        >
-          <AppIcon name="moreHorizontal" size="md" />
-        </button>
       </div>
     </Card>
   );

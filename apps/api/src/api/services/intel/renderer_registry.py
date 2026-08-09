@@ -68,7 +68,7 @@ _FFMPEG_BASIC = RendererCapability(
     supported_aspect_ratios=frozenset({"9:16", "1:1", "16:9"}),
     supported_styles=frozenset({"ffmpeg_basic", "sports_hype", "documentary"}),
     supported_caption_modes=frozenset({"off", "basic"}),
-    supported_crop_modes=frozenset({"fit", "center", "action", "face", "manual"}),
+    supported_crop_modes=frozenset({"fit", "center", "action", "face", "smart", "manual"}),
     gpu_required=False,
     capabilities=frozenset({"watermark", "normalize_audio", "scale", "pad", "crop"}),
     min_duration_s=0.5,
@@ -81,7 +81,7 @@ _SPORTS_HYPE = RendererCapability(
     supported_aspect_ratios=frozenset({"9:16", "1:1"}),
     supported_styles=frozenset({"sports_hype"}),
     supported_caption_modes=frozenset({"basic", "sports_hype"}),
-    supported_crop_modes=frozenset({"fit", "center", "action"}),
+    supported_crop_modes=frozenset({"fit", "center", "action", "smart"}),
     gpu_required=False,
     capabilities=frozenset(
         {"watermark", "normalize_audio", "scale", "pad", "crop", "kinetic_captions"}

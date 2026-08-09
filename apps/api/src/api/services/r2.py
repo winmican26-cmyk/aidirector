@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import shutil
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 from api.config import get_settings
@@ -71,15 +71,32 @@ def local_mirror_path() -> Path:
 
 
 def upload_key(tenant_id: str, upload_id: str, filename: str) -> str:
-    return f"tenant/{tenant_id}/upload/{upload_id}/{filename}"
+    return f"tenant/{tenant_id}/upload/{upload_id}/{_safe_filename(filename)}"
 
 
 def render_key(tenant_id: str, render_id: str, filename: str) -> str:
-    return f"tenant/{tenant_id}/render/{render_id}/{filename}"
+    return f"tenant/{tenant_id}/render/{render_id}/{_safe_filename(filename)}"
 
 
 def export_key(tenant_id: str, export_id: str, filename: str) -> str:
-    return f"tenant/{tenant_id}/exports/{export_id}/{filename}"
+    return f"tenant/{tenant_id}/exports/{export_id}/{_safe_filename(filename)}"
+
+
+def _safe_filename(filename: str) -> str:
+    """Keep generated object keys inside their tenant-owned prefix."""
+    name = PurePosixPath(str(filename).replace("\\", "/")).name
+    if not name or name in {".", ".."}:
+        raise ValueError("storage filename must be a basename")
+    return name
+
+
+def _safe_key(key: str) -> str:
+    """Reject absolute or traversal keys before local or remote storage use."""
+    normalized = str(key).replace("\\", "/")
+    path = PurePosixPath(normalized)
+    if path.is_absolute() or ".." in path.parts:
+        raise ValueError("storage key must be relative and cannot contain '..'")
+    return normalized
 
 
 # --- URI builders (scheme-aware) -------------------------------------------
@@ -87,6 +104,7 @@ def export_key(tenant_id: str, export_id: str, filename: str) -> str:
 
 def build_storage_uri(key: str) -> str:
     """Return a storage URI for a key under the active transport mode."""
+    key = _safe_key(key)
     if is_r2_configured():
         s = get_settings()
         return f"r2://{s.r2_bucket}/{key}"
@@ -119,6 +137,7 @@ def put_local_file(local_path: Path, key: str, *, verify: bool = True) -> Upload
         file — same shape, same return type, so tests and probes use
         the same code path.
     """
+    key = _safe_key(key)
     if not local_path.exists():
         raise FileNotFoundError(local_path)
     src_bytes = local_path.stat().st_size
@@ -161,6 +180,7 @@ def put_local_file(local_path: Path, key: str, *, verify: bool = True) -> Upload
 
 def presign_put(key: str, content_type: str, expires_s: int = 3600) -> str:
     """Return a presigned PUT URL the client can upload to directly."""
+    key = _safe_key(key)
     if not is_r2_configured():
         return f"local-presign-stub://{key}"
     s = get_settings()
@@ -185,6 +205,7 @@ def signed_get_url(key: str, *, expires_s: int = 3600) -> str:
     here so probes that don't have R2 credentials still exercise the
     same call path.
     """
+    key = _safe_key(key)
     if not is_r2_configured():
         abs_path = local_mirror_path() / key
         return f"local://{abs_path.as_posix()}"
@@ -201,6 +222,7 @@ def delete_object(key: str) -> bool:
 
     Used by the retention policy service to clean up expired clips.
     """
+    key = _safe_key(key)
     if is_r2_configured():
         from botocore.exceptions import ClientError
 
@@ -226,6 +248,7 @@ def get_object(key: str) -> bytes | None:
 
     Used by C2PA trust anchor and DID document retrieval.
     """
+    key = _safe_key(key)
     if is_r2_configured():
         from botocore.exceptions import ClientError
 
@@ -249,6 +272,7 @@ def head_object(key: str) -> dict[str, Any] | None:
     """HEAD a stored object. None if absent. Used by the post-upload
     verification path and by the export-presign route to confirm bytes
     exist before issuing a signed URL."""
+    key = _safe_key(key)
     if is_r2_configured():
         from botocore.exceptions import ClientError  # noqa: PLC0415
 

@@ -8,8 +8,8 @@ Two entrypoints:
   - `analyze_video_fixture`: runs the phase-2 OmegaClips integration path
     (scoreboard change tracking over a synthetic OCR fixture). Useful for
     local probes and CI smoke tests; does NOT require a video file.
-  - `analyze_video`: phase-3 entrypoint that will download R2 source, run
-    the full orchestrator, and write scenes back. Stub for now.
+  - `analyze_video`: production entrypoint that downloads the R2 source, runs
+    the strict-real orchestrator, and writes typed scenes and candidates back.
 """
 
 from __future__ import annotations
@@ -42,12 +42,13 @@ def analyze_video(job_id: str, upload_r2_key: str, tenant_slug: str) -> dict:
     Pipeline:
       1. Load Job from DB
       2. Download source from R2
-      3. Run scene analysis (OmegaClips adapter or stub fallback)
+      3. Run scene analysis through the strict-real OmegaClips orchestrator
       4. Persist Scene + ClipCandidate rows
       5. Return result summary
 
-    When OmegaClips is not available or the source is missing, falls back
-    to the same stub mechanism as modal_app.py:run_scene_analysis.
+    Missing R2 configuration, missing source media, unavailable OmegaClips,
+    or an incomplete highlight artifact fail the job. Synthetic production
+    candidates are deliberately never created.
     """
     import tempfile
     import uuid as _uuid
@@ -90,11 +91,16 @@ def analyze_video(job_id: str, upload_r2_key: str, tenant_slug: str) -> dict:
                 )
                 client.download_file(s.r2_bucket, upload_r2_key, str(source_path))
             else:
-                log.warning("R2 not configured — using stub candidates")
+                log.error("R2 is not configured; refusing synthetic scene output")
                 source_path = None
 
-            # Run OmegaClips (or stub)
-            candidates = _run_omega_clips_stub(job_id)
+            if source_path is None:
+                raise RuntimeError(
+                    "R2 is not configured; refusing to create synthetic candidates for a production job"
+                )
+
+            # Run the real OmegaClips pipeline and read its typed event artifact.
+            candidates = _run_omega_clips(job_id, source_path, tmp_dir)
             scenes_written = 0
             candidates_written = 0
             for i, c in enumerate(candidates):
@@ -144,6 +150,13 @@ def analyze_video(job_id: str, upload_r2_key: str, tenant_slug: str) -> dict:
             }
         except Exception:
             db.rollback()
+            job = db.execute(
+                select(JobModel).where(JobModel.id == _uuid.UUID(job_id))
+            ).scalar_one_or_none()
+            if job is not None:
+                job.status = "failed"
+                job.error = "Scene analysis failed; inspect worker logs for details"
+                db.commit()
             raise
         finally:
             import shutil
@@ -164,15 +177,46 @@ def _ClipCandidate(*args, **kwargs):
     return ClipCandidate(*args, **kwargs)
 
 
-def _run_omega_clips_stub(job_id: str) -> list[dict]:
-    """Return placeholder candidates when OmegaClips isn't available."""
+def _run_omega_clips(job_id: str, source_path, workspace_root) -> list[dict]:
+    """Run OmegaClips and normalize its highlight packaging artifact."""
+    import json
+    from pathlib import Path
+
+    from football_pipeline.config import PipelineConfig
+    from football_pipeline.orchestrator import FootballPipelineOrchestrator
+
+    job_dir = Path(workspace_root) / f"omega_{job_id}"
+    config = PipelineConfig(
+        explicit_input_path=str(source_path),
+        workspace_dir=Path(workspace_root),
+        pipeline_execution_mode="strict_real_only",
+        strict_real_blocks_synthetic_generation=True,
+        strict_real_blocks_reconstructed_outputs=True,
+        final_render_export_enabled=False,
+        render_execution_enabled=False,
+        publishing_layer_enabled=False,
+        direct_publishing_enabled=False,
+    )
+    result = FootballPipelineOrchestrator(cfg=config).run_full_pipeline(
+        str(source_path), job_id=job_id, job_dir=job_dir
+    )
+    if result.get("status") != "complete":
+        raise RuntimeError(f"OmegaClips analysis failed: {result.get('error', result.get('blockers'))}")
+
+    artifact = job_dir / "debug" / "highlight_packaging_summary.json"
+    if not artifact.exists():
+        raise RuntimeError(f"OmegaClips did not produce {artifact.name}")
+    payload = json.loads(artifact.read_text(encoding="utf-8"))
+    events = payload.get("events", [])
+    if not events:
+        raise RuntimeError("OmegaClips produced no highlight candidates")
     return [
         {
-            "candidate_id": f"stub-{i}",
-            "start_s": i * 30.0,
-            "end_s": i * 30.0 + 15.0,
-            "fi_score": round(9.5 - i * 0.3, 1),
-            "label": "stub",
+            "start_s": event.get("clip_start_sec", 0.0),
+            "end_s": event.get("clip_end_sec", 0.0),
+            "fi_score": event.get("packaging_quality_score", 0.0) * 10.0,
+            "label": event.get("event_type_label", "highlight"),
+            "signals": {"omega_event": event},
         }
-        for i in range(6)
+        for event in events
     ]

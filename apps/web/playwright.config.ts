@@ -5,6 +5,9 @@ const baseURL = process.env.E2E_BASE_URL ?? process.env.PLAYWRIGHT_BASE_URL ?? `
 
 export default defineConfig({
   testDir: "./e2e",
+  // Next.js may compile several protected routes on the first parallel run.
+  // Keep cold-start compilation separate from the UX assertions themselves.
+  timeout: 120_000,
   outputDir: "./test-results",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

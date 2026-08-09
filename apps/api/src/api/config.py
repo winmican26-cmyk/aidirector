@@ -5,7 +5,11 @@ from typing import Literal
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-_REPO_ROOT = Path(__file__).resolve().parents[4]
+# In the repository this resolves to the workspace root. The production image
+# uses /app/src/api, so there is no fourth parent; environment variables are
+# injected by the container in that layout.
+_CONFIG_PATH = Path(__file__).resolve()
+_REPO_ROOT = _CONFIG_PATH.parents[4] if len(_CONFIG_PATH.parents) > 4 else Path("/app")
 _WORKSPACE_ENV = _REPO_ROOT / ".env.local"
 
 
@@ -24,6 +28,7 @@ class Settings(BaseSettings):
     r2_secret_access_key: str = ""
     r2_bucket: str = ""
     r2_public_base_url: str = ""
+    app_base_url: str = "http://localhost:3000"
 
     clerk_publishable_key: str = ""
     clerk_secret_key: str = ""

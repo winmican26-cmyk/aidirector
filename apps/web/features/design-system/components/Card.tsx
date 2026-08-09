@@ -26,21 +26,31 @@ export function Card({
   dense = false,
   onClick,
 }: CardProps) {
-  const Component = onClick ? "button" : "div";
-
   return (
-    <Component
+    <div
       onClick={onClick}
+      onKeyDown={
+        onClick
+          ? (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
       className={cn(
-        "rounded-2xl bg-white border border-slate-200 shadow-sm",
+        "rounded-2xl bg-[color:var(--color-surface-2)] border border-[color:var(--color-border-strong)] shadow-[var(--shadow-card)]",
         dense ? "p-4" : "p-6 md:p-8",
         hoverable &&
-          "transition-all duration-200 hover:shadow-md hover:border-slate-300",
+          "transition-all duration-200 hover:shadow-[var(--shadow-card-hover)] hover:border-[color:var(--color-border-accent)]",
         onClick && "text-left w-full cursor-pointer",
         className,
       )}
     >
       {children}
-    </Component>
+    </div>
   );
 }

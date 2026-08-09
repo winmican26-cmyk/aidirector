@@ -12,7 +12,7 @@ Returns a summary dict (stored in rq Job.result for polling).
 Pipeline:
   1. Load Job + Upload from DB
   2. Download source file from R2 → /tmp/
-  3. Run OmegaClips intelligence (or stub fallback) → Scene + ClipCandidate rows
+  3. Run OmegaClips intelligence → Scene + ClipCandidate rows
   4. Call Director Agent LLM (or deterministic fallback) → DirectorPlan
   5. Persist Scene, ClipCandidate, and DirectorPlan rows
   6. Transition Job RUNNING → SUCCEEDED
@@ -83,10 +83,9 @@ def run_analysis(payload: dict) -> dict:
             )
             client.download_file(settings.r2_bucket, source_key, str(source_path))
         else:
-            log.warning("scene_analysis: R2 not configured — using stub source")
-            source_path = None
+            raise RuntimeError("R2 is not configured; refusing to create synthetic candidates")
 
-        # Run OmegaClips FI-1→FI-13 intelligence (or stub fallback)
+        # Run OmegaClips FI-1→FI-13 intelligence
         candidates = _run_omega_clips(job_id, source_path, log, content_type=upload.sport)
 
         # Run Director Agent LLM (or deterministic fallback)
@@ -210,11 +209,10 @@ def _persist_analysis_result(
     candidates: list[dict],
     log,
 ) -> None:
-    """Persist Scene + ClipCandidate rows from OmegaClips (or stub) output.
+    """Persist every Scene + ClipCandidate produced by OmegaClips.
 
-    This function mirrors modal_app.py:_persist_analysis_result. Any
-    persistence failure in the analysis path should not block the pipeline
-    — we log and continue.
+    A partial analysis is not a valid successful job: silently dropping a
+    candidate makes ranking and audit results impossible to trust.
     """
     import uuid as _uuid
 
@@ -223,48 +221,44 @@ def _persist_analysis_result(
     scenes_written = 0
     candidates_written = 0
     for i, c in enumerate(candidates):
-        try:
-            scene = Scene(
-                id=_uuid.uuid4(),
-                job_id=job.id,
-                tenant_id=job.tenant_id,
-                t_start=float(c.get("start_s", c.get("t_start", i * 30.0))),
-                t_end=float(c.get("end_s", c.get("t_end", i * 30.0 + 15.0))),
-                kind=c.get("kind", c.get("label", "highlight")),
-                arc_position=c.get("arc_position", "climax"),
-                intensity=float(c.get("intensity", c.get("fi_score", 7.0)) / 10.0),
-                importance=float(c.get("importance", c.get("fi_score", 7.0)) / 10.0),
-                signals=c.get("signals", {"source": "omega_clips"}),
-            )
-            db.add(scene)
-            db.flush()
-            scenes_written += 1
+        scene = Scene(
+            id=_uuid.uuid4(),
+            job_id=job.id,
+            tenant_id=job.tenant_id,
+            t_start=float(c.get("start_s", c.get("t_start", i * 30.0))),
+            t_end=float(c.get("end_s", c.get("t_end", i * 30.0 + 15.0))),
+            kind=c.get("kind", c.get("label", "highlight")),
+            arc_position=c.get("arc_position", "climax"),
+            intensity=float(c.get("intensity", c.get("fi_score", 7.0)) / 10.0),
+            importance=float(c.get("importance", c.get("fi_score", 7.0)) / 10.0),
+            signals=c.get("signals", {"source": "omega_clips"}),
+        )
+        db.add(scene)
+        db.flush()
+        scenes_written += 1
 
-            candidate = ClipCandidate(
-                id=_uuid.uuid4(),
-                job_id=job.id,
-                tenant_id=job.tenant_id,
-                scene_id=scene.id,
-                t_start=scene.t_start,
-                t_end=scene.t_end,
-                confidence_score=float(c.get("fi_score", c.get("confidence_score", 7.0))),
-                quality_score=float(c.get("fi_score", c.get("quality_score", 7.0))),
-                platform_score=float(c.get("fi_score", c.get("platform_score", 7.0))),
-                scores=c.get(
-                    "scores",
-                    {
-                        "rank_score": float(c.get("fi_score", 7.0)),
-                        "confidence_score": float(c.get("fi_score", 7.0)),
-                    },
-                ),
-            )
-            if c.get("rationale"):
-                candidate.rationale = str(c["rationale"])
-            db.add(candidate)
-            candidates_written += 1
-        except Exception as exc:
-            log.warning("scene_analysis: failed to persist candidate %d: %s", i, exc)
-            continue
+        candidate = ClipCandidate(
+            id=_uuid.uuid4(),
+            job_id=job.id,
+            tenant_id=job.tenant_id,
+            scene_id=scene.id,
+            t_start=scene.t_start,
+            t_end=scene.t_end,
+            confidence_score=float(c.get("fi_score", c.get("confidence_score", 7.0))),
+            quality_score=float(c.get("fi_score", c.get("quality_score", 7.0))),
+            platform_score=float(c.get("fi_score", c.get("platform_score", 7.0))),
+            scores=c.get(
+                "scores",
+                {
+                    "rank_score": float(c.get("fi_score", 7.0)),
+                    "confidence_score": float(c.get("fi_score", 7.0)),
+                },
+            ),
+        )
+        if c.get("rationale"):
+            candidate.rationale = str(c["rationale"])
+        db.add(candidate)
+        candidates_written += 1
 
     log.info(
         "scene_analysis: persisted %d scenes, %d candidates for job=%s",
@@ -275,34 +269,61 @@ def _persist_analysis_result(
 
 
 def _run_omega_clips(job_id: str, source_path, log, content_type: str = "football") -> list[dict]:
-    """Run OmegaClips FI-1→FI-13 on the source file, falling back to stubs."""
+    """Run OmegaClips FI-1→FI-13 and normalize its event artifact."""
     if content_type == "podcast":
         raise RuntimeError("Podcast analysis requires a diarization/transcription adapter")
-    try:
-        intel_path = Path(__file__).resolve().parents[3] / "packages" / "intel"
-        if intel_path.exists() and str(intel_path) not in __import__("sys").path:
-            __import__("sys").path.insert(0, str(intel_path))
-        from omega_clips import analyze  # type: ignore[import]
+    if source_path is None:
+        raise RuntimeError("OmegaClips requires a downloaded source video")
 
-        results = analyze(str(source_path)) if source_path else []
-        log.info(
-            "scene_analysis: OmegaClips returned %d candidates for job=%s",
-            len(results),
-            job_id,
-        )
-        return results
-    except ImportError:
-        log.warning("scene_analysis: OmegaClips not importable — using stub candidates")
+    import json
+    import tempfile
+
+    intel_path = Path(__file__).resolve().parents[3] / "packages" / "intel"
+    if intel_path.exists() and str(intel_path) not in __import__("sys").path:
+        __import__("sys").path.insert(0, str(intel_path))
+    from football_pipeline.config import PipelineConfig
+    from football_pipeline.orchestrator import FootballPipelineOrchestrator
+
+    workspace = Path(tempfile.mkdtemp(prefix=f"aidirector_omega_{job_id}_"))
+    config = PipelineConfig(
+        explicit_input_path=str(source_path),
+        workspace_dir=workspace,
+        pipeline_execution_mode="strict_real_only",
+        strict_real_blocks_synthetic_generation=True,
+        strict_real_blocks_reconstructed_outputs=True,
+        final_render_export_enabled=False,
+        render_execution_enabled=False,
+        publishing_layer_enabled=False,
+        direct_publishing_enabled=False,
+    )
+    result = FootballPipelineOrchestrator(cfg=config).run_full_pipeline(
+        str(source_path), job_id=job_id, job_dir=workspace / job_id
+    )
+    if result.get("status") != "complete":
+        raise RuntimeError(f"OmegaClips failed: {result.get('error', result.get('blockers'))}")
+
+    artifact = workspace / job_id / "debug" / "highlight_packaging_summary.json"
+    if not artifact.exists():
+        raise RuntimeError("OmegaClips did not produce highlight packaging output")
+    try:
+        events = json.loads(artifact.read_text(encoding="utf-8")).get("events", [])
+        if not events:
+            raise RuntimeError("OmegaClips produced no highlight candidates")
+        log.info("scene_analysis: OmegaClips returned %d candidates for job=%s", len(events), job_id)
         return [
             {
-                "candidate_id": f"stub-{i}",
-                "start_s": i * 30.0,
-                "end_s": i * 30.0 + 15.0,
-                "fi_score": round(9.5 - i * 0.3, 1),
-                "label": "stub",
+                "start_s": event.get("clip_start_sec", 0.0),
+                "end_s": event.get("clip_end_sec", 0.0),
+                "fi_score": event.get("packaging_quality_score", 0.0) * 10.0,
+                "label": event.get("event_type_label", "highlight"),
+                "signals": {"omega_event": event},
             }
-            for i in range(6)
+            for event in events
         ]
+    finally:
+        import shutil
+
+        shutil.rmtree(workspace, ignore_errors=True)
 
 
 def _run_director_agent(job_id: str, candidates: list[dict], log, content_type: str = "football") -> dict:

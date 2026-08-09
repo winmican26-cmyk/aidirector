@@ -7,5 +7,7 @@ from workers.modal_app import app, intel_image, secrets
 
 @app.function(image=intel_image, secrets=secrets, timeout=600, memory=4096)
 def finish_with_ffmpeg(job_id: str, scene_id: str, params: dict) -> dict:
-    """Stub — wraps football_pipeline.render_execution. Phase 1."""
-    raise NotImplementedError("Phase 1")
+    """Render a manifest using the canonical FFmpeg adapter."""
+    from workers.renderers._adapter import render_manifest
+
+    return render_manifest(params)

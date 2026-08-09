@@ -22,5 +22,7 @@ remotion_image = (
 
 @app.function(image=remotion_image, secrets=secrets, timeout=1200, memory=8192)
 def render_remotion(job_id: str, scene_id: str, params: dict) -> dict:
-    """Stub — Phase 3."""
-    raise NotImplementedError("Phase 3")
+    """Use the validated adapter until the Remotion bundle is configured."""
+    from workers.renderers._adapter import render_manifest
+
+    return render_manifest(params)

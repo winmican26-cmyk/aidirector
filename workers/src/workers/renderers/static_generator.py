@@ -11,5 +11,7 @@ from workers.modal_app import app, intel_image, secrets
 
 @app.function(image=intel_image, secrets=secrets, timeout=120, memory=1024)
 def render_static(job_id: str, scene_id: str, params: dict) -> dict:
-    """Stub — Phase 2. Templates: quote_card, stat_overlay, score_graphic, thumbnail."""
-    raise NotImplementedError("Phase 2")
+    """Render a static-compatible manifest through the shared adapter."""
+    from workers.renderers._adapter import render_manifest
+
+    return render_manifest(params)

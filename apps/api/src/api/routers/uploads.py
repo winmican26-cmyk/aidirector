@@ -8,9 +8,10 @@ Clients PUT the file to R2 directly using the returned URL, then POST
 from __future__ import annotations
 
 import uuid
+from pathlib import PurePosixPath
 
 from fastapi import APIRouter, HTTPException, Request, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import select
 
 from api.deps import Claims, DbSession, TenantRow
@@ -23,10 +24,25 @@ router = APIRouter(prefix="/uploads", tags=["uploads"])
 
 
 class PresignRequest(BaseModel):
-    filename: str
+    filename: str = Field(min_length=1, max_length=255)
     content_type: str = "video/mp4"
-    size_bytes: int
+    size_bytes: int = Field(gt=0, le=2_200_000_000)
     sport: str = "football"
+
+    @field_validator("filename")
+    @classmethod
+    def filename_must_be_a_basename(cls, value: str) -> str:
+        name = PurePosixPath(value.replace("\\", "/")).name
+        if not name or name in {".", ".."}:
+            raise ValueError("filename must contain a file name")
+        return name
+
+    @field_validator("content_type")
+    @classmethod
+    def content_type_must_be_video(cls, value: str) -> str:
+        if not value.startswith("video/"):
+            raise ValueError("content_type must be a video MIME type")
+        return value
 
 
 class PresignResponse(BaseModel):
@@ -59,8 +75,7 @@ def presign(
 ) -> PresignResponse:
     """Create Upload row + return presigned R2 URL.
 
-    Phase 0: persist the row; presign URL is a stub returning the contract shape.
-    The real R2 presigner lives in api.services.r2 — wired in phase 1.
+    Persist the upload contract and return a mode-aware presigned URL.
     """
     from api.services.billing import check_match_quota
 
