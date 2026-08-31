@@ -38,7 +38,7 @@ services:
     restart: unless-stopped
     env_file: .env.local
     environment:
-      DATABASE_URL: postgresql://aidirector:dev_password@postgres:5432/aidirector
+      DATABASE_URL: postgresql+psycopg://aidirector:dev_password@postgres:5432/aidirector
       REDIS_URL: redis://redis:6379
       ENV: development
     ports:
@@ -63,7 +63,7 @@ services:
     command: ["rq", "worker", "--url", "redis://redis:6379", "q:render-cpu", "q:cv", "q:llm", "q:export"]
     env_file: .env.local
     environment:
-      DATABASE_URL: postgresql://aidirector:dev_password@postgres:5432/aidirector
+      DATABASE_URL: postgresql+psycopg://aidirector:dev_password@postgres:5432/aidirector
       REDIS_URL: redis://redis:6379
       ENV: development
     depends_on:

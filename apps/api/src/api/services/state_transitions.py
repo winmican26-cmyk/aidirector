@@ -198,7 +198,7 @@ def transition(
         )
 
         # Publish to WebSocket event stream (fire-and-forget, best-effort)
-        _publish_event(kind, row, from_state, to_state, reason)
+        _publish_event(kind, row, from_state, to, reason)
 
         return from_state
 
@@ -234,7 +234,7 @@ def transition(
     )
 
     # Publish to WebSocket event stream (fire-and-forget, best-effort)
-    _publish_event(kind, row, from_state, to_state, reason)
+    _publish_event(kind, row, from_state, to, reason)
 
     return from_state
 

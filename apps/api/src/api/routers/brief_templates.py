@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, Response, status
 from pydantic import BaseModel
 from sqlalchemy import select
 
@@ -185,13 +185,14 @@ def update_brief_template(
     return _serialize(row)
 
 
-@router.delete("/{template_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{template_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
 def delete_brief_template(
     template_id: uuid.UUID, tenant: TenantRow, db: DbSession
-) -> None:
+) -> Response:
     row = _get_or_404(db, template_id, tenant.id)
     db.delete(row)
     db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 # --- Helpers ----------------------------------------------------------------

@@ -5,14 +5,23 @@ the settings object. No I/O, no network, fast.
 """
 from __future__ import annotations
 
+from pathlib import Path
+from alembic.config import Config
+from alembic.script import ScriptDirectory
+
+def _get_alembic_config() -> Config:
+    ini_path = Path(__file__).parent.parent.parent / "alembic.ini"
+    cfg = Config(str(ini_path))
+    # Alembic resolves script_location relative to the process cwd, while
+    # pytest may be launched from the repository root or apps/api.
+    cfg.set_main_option("script_location", str(ini_path.parent / "alembic"))
+    return cfg
+
 
 class TestAlembicMigrations:
     def test_single_head(self):
         """Exactly one migration head — no diverged branches."""
-        from alembic.config import Config
-        from alembic.script import ScriptDirectory
-
-        cfg = Config("alembic.ini")
+        cfg = _get_alembic_config()
         script = ScriptDirectory.from_config(cfg)
         heads = script.get_heads()
         assert len(heads) == 1, (
@@ -22,10 +31,7 @@ class TestAlembicMigrations:
 
     def test_revision_chain_has_no_gaps(self):
         """Every revision in the chain is reachable from the base."""
-        from alembic.config import Config
-        from alembic.script import ScriptDirectory
-
-        cfg = Config("alembic.ini")
+        cfg = _get_alembic_config()
         script = ScriptDirectory.from_config(cfg)
         # walk_revisions() raises if there are orphaned revisions
         revisions = list(script.walk_revisions())
@@ -35,11 +41,7 @@ class TestAlembicMigrations:
         """The head's ancestry must include every file in versions/ — catches a
         new migration added without being chained in as the new head (which
         would silently leave it unreachable and unapplied)."""
-        from pathlib import Path
-        from alembic.config import Config
-        from alembic.script import ScriptDirectory
-
-        cfg = Config("alembic.ini")
+        cfg = _get_alembic_config()
         script = ScriptDirectory.from_config(cfg)
         head = script.get_current_head()
 
