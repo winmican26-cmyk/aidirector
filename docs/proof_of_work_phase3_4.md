@@ -269,7 +269,7 @@ As per the project plan, Phase 3.4 being **PASS** means the project now enters *
 | Component | Configuration |
 |-----------|--------------|
 | Device | Windows 11 Desktop |
-| Browser | Playwright Chromium (Docker) |
+| Browser | Manual browser verification |
 | App Mode | Development (`next dev`) |
 | Port | 3001 (via host IP 192.168.10.154) |
 | Auth | Clerk (development instance) |
@@ -302,3 +302,176 @@ test-video.mp4                        # Temp file (deleted)
 ```
 
 No application source files were modified during this walkthrough.
+
+---
+
+## Appendix D: Beta Stabilization Addendum (2026-07-31)
+
+### Changes made
+
+- Updated `apps/web/next.config.ts` to emit the minimum Clerk worker policy: `worker-src 'self' blob:` (with matching `child-src` fallback).
+- Retained the processing page lifecycle guard so its interval is active after React development-mode remounts. The page remains an explicitly client-side simulation; it is not connected to the real job-event transport.
+
+### Regression results
+
+| Check | Result |
+|---|---|
+| Web TypeScript | PASS — `pnpm typecheck` |
+| Frontend tests | PASS — 14 files, 125 tests |
+| API tests | PASS — 187 passed, 10 skipped |
+| Production build | PASS — `pnpm build` |
+| `git diff --check` | PASS |
+
+### Verification classification
+
+| Content type | UI verified | Backend verified | Real-media verified | End-to-end verified |
+|---|---|---|---|---|
+| Football | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| Basketball | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| Podcast | PASS | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+
+### Remaining blockers and limitations
+
+- Runtime browser verification of the production CSP was not completed in this environment; the production build succeeded and the configured/generated header source contains `worker-src 'self' blob:`.
+- Real backend verification was not possible because Docker Desktop was unavailable and no running API/worker deployment was provided. Consequently upload, queueing, processing progress, completion, clips, preview/download, analytics, and failure handling remain NOT VERIFIED.
+- The processing page's current simulation is suitable only for demo mode. Real processing progress must be verified through the existing backend/event transport before claiming production readiness.
+
+### Final recommendation
+
+# PASS WITH LIMITATIONS
+
+The verified code-level defects are addressed and regression checks pass. Do not claim real pipeline or real-media verification until the backend and workers are running and the authorized Football, Basketball, and Podcast media checks are completed.
+
+---
+
+## Appendix E: Real Backend E2E Verification Attempt (2026-07-31)
+
+### Runtime requirements inspected
+
+The documented local topology requires Docker Compose services for Postgres, Redis, the FastAPI API, and the RQ worker. The real pipeline also requires Cloudflare R2 storage and configured AI/Modal dependencies where enabled. The frontend is started separately with Next.js.
+
+### Service verification
+
+- Remote Neon database: SERVICE VERIFIED — `SELECT 1` succeeded.
+- Remote Upstash Redis: SERVICE VERIFIED — `PING` succeeded.
+- Docker Compose stack: NOT VERIFIED — Docker Desktop Linux engine is unavailable.
+- API service: NOT STARTED.
+- RQ worker: NOT STARTED.
+- Browser runtime: NOT AVAILABLE — browser-control connection reported no browser available.
+
+### Real-media verification
+
+No Football, Basketball, or Podcast source video was processed during this attempt. No upload, job, queue, progress, completion, clips, preview, download, analytics, or failure-handling result is claimed.
+
+### Failure classification
+
+- Exact failure: complete runtime stack could not be started because Docker Desktop's Linux engine was unavailable.
+- Root cause: test-environment/infrastructure availability; no application defect was established.
+- Additional blocker: browser infrastructure was unavailable for sign-in, console inspection, CSP verification, and UI workflow execution.
+- Minimal fix: start Docker Desktop's Linux engine, ensure the documented Compose services become healthy, provide the browser runtime, and provide authorized source media for all three content types.
+
+### Required rerun
+
+1. Start Docker Desktop and run the documented API/worker Compose topology.
+2. Verify API, database, Redis, R2, and worker health.
+3. Open the app in an available browser and inspect the Clerk console output.
+4. Process authorized Football, Basketball, and Podcast/interview media.
+5. Capture backend status transitions, generated artifacts, preview/download results, analytics events, and failure handling for each run.
+
+### Real E2E recommendation
+
+# NOT VERIFIED
+
+The real backend E2E gate remains open. Do not proceed to Phase 4 feature development.
+
+---
+
+## Appendix F: Docker Runtime E2E Retry (2026-07-31)
+
+### Runtime result
+
+Docker Desktop Linux engine was available for this retry. The documented Compose stack was built and started successfully after fixing verified container startup defects:
+
+- `apps/api/Dockerfile`: console scripts now retain the runtime `/app/.venv` path.
+- `apps/api/src/api/config.py`: container-safe configuration-root fallback.
+- `apps/api/src/api/services/intel/omega_client.py`: container-safe optional intel-submodule fallback.
+- `docker-compose.yml`: explicit `postgresql+psycopg` driver URL.
+
+### Services verified
+
+- Postgres: PASS — healthy.
+- Redis: PASS — healthy.
+- API: PASS — healthy on `http://localhost:8000`.
+- RQ worker: PASS — listening on `q:render-cpu`, `q:cv`, `q:llm`, and `q:export`.
+- Database migrations: PASS — upgraded through revision `0010`.
+- FFmpeg: PASS — present in the API/worker image.
+- API health: PASS — DB, queue, Stripe, and R2 checks returned `ok`.
+- Web CSP header: PASS at HTTP level — emitted `worker-src 'self' blob:`.
+
+### Browser and real-media result
+
+- Browser verification: NOT VERIFIED — browser-control reported no browser available.
+- Clerk console verification: NOT VERIFIED.
+- Football real-media E2E: NOT VERIFIED — no authorized source video was run through upload and processing.
+- Basketball real-media E2E: NOT VERIFIED — no authorized Basketball source video is present.
+- Podcast real-media E2E: NOT VERIFIED — no authorized Podcast/interview source video is present.
+- Processing screen backend progress: NOT VERIFIED — the page remains connected to client-side simulation rather than the real job-event transport.
+
+### Regression results after runtime fixes
+
+- Web TypeScript: PASS — 0 errors.
+- Frontend tests: PASS — 125 passed.
+- API tests: PASS — 187 passed, 10 skipped.
+- `git diff --check`: PASS.
+
+### Final classification
+
+- Code verified: PASS.
+- Service verified: PASS.
+- Real-media verified: NOT VERIFIED.
+- Browser verified: NOT VERIFIED.
+- Full E2E verified: NOT VERIFIED.
+
+# NOT VERIFIED
+
+The runtime stack is healthy, but the requested authenticated browser workflows and real Football/Basketball/Podcast media processing were not completed. Do not proceed to Phase 4 feature development.
+
+---
+
+## Appendix G: Continued Real E2E Gate (2026-07-31)
+
+The runtime stack remains operational. The Football workflow was not started beyond service verification because the required authenticated browser session and an identified authorized real Football upload were unavailable. Repository media under `packages/intel` was not used as E2E evidence because authorization and intended test scope were not established.
+
+| Gate | Football | Basketball | Podcast |
+|---|---|---|---|
+| Upload | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| Job creation | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| Queue | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| Worker | SERVICE VERIFIED only | NOT VERIFIED | NOT VERIFIED |
+| Intelligence | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| Processing | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| Rendering | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| Clips generated | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| My Clips | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| Preview | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| Download | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| Analytics | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| Failure handling | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+
+### Exact blockers
+
+- Browser runtime: unavailable, so sign-in, upload UI, My Clips, preview/download, and browser console/CSP behavior could not be observed.
+- Authorized media: no authorized Football, Basketball, or Podcast source media was identified for this run.
+- Real processing progress: NOT VERIFIED. The Processing page still contains the 180-second client-side simulation and is not evidence of backend progress.
+
+### Classification
+
+- Runtime service verification: PASS.
+- Code verification: PASS from prior regression run.
+- Browser verification: NOT VERIFIED.
+- Real-media verification: NOT VERIFIED.
+- Full E2E verification: NOT VERIFIED.
+
+# NOT VERIFIED
+
+Stop condition reached at the Football authorization/browser gate. Do not proceed to Phase 4 feature development. Rerun with an available authenticated browser session and authorized source videos for all three content types.

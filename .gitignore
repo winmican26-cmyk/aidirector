@@ -33,6 +33,13 @@ next-env.d.ts
 .vercel/
 .pnpm-store/
 
+# Playwright (E2E) artifacts
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/blob-report/
+apps/web/.playwright/
+playwright/.cache/
+
 # Modal
 .modal/
 modal_cache/
@@ -73,6 +80,7 @@ secrets/
 apps/api/_probe_*.out
 apps/api/_probe_*.db
 apps/api/aidirector_probe.db
+apps/api/aidirector_*probe*.db
 apps/api/_probe_phase5_fixtures/
 apps/api/_probe_phase6_fixtures/
 apps/api/_probe_phase7_fixtures/
