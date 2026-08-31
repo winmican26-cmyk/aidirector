@@ -48,7 +48,7 @@ export function ProgressTimeline({
 
   return (
     <div className={cn("w-full", className)}>
-      <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 text-center">
+      <h4 className="text-xs font-semibold uppercase tracking-wider text-[color:var(--color-text-tertiary)] mb-3 text-center">
         What&apos;s Happening?
       </h4>
       <ul
@@ -65,9 +65,9 @@ export function ProgressTimeline({
               key={stage.id}
               className={cn(
                 "flex items-center gap-3 py-2.5 transition-colors duration-300",
-                isCompleted && "text-emerald-600",
-                isActive && "text-slate-900",
-                isPending && "text-slate-400",
+                isCompleted && "text-[color:var(--color-accent-green)]",
+                isActive && "text-[color:var(--color-text-primary)]",
+                isPending && "text-[color:var(--color-text-tertiary)]",
               )}
             >
               {/* Status indicator */}
@@ -76,7 +76,7 @@ export function ProgressTimeline({
                   <AppIcon
                     name="checkCircle"
                     size="sm"
-                    className="text-emerald-500"
+                    className="text-[color:var(--color-accent-green)]"
                   />
                 )}
                 {isActive && (
@@ -84,15 +84,15 @@ export function ProgressTimeline({
                     {/* Pinging ring */}
                     <span
                       className={cn(
-                        "absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75",
+                        "absolute inline-flex h-full w-full rounded-full bg-[color:var(--color-accent-green)] opacity-75",
                         "motion-safe:animate-ping",
                       )}
                     />
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-[color:var(--color-accent-green)]" />
                   </span>
                 )}
                 {isPending && (
-                  <span className="h-3 w-3 rounded-full border-2 border-slate-300" />
+                  <span className="h-3 w-3 rounded-full border-2 border-[color:var(--color-border-strong)]" />
                 )}
               </span>
 
@@ -101,7 +101,7 @@ export function ProgressTimeline({
                 className={cn(
                   "text-sm transition-all duration-300",
                   isActive && "font-semibold",
-                  isCompleted && "line-through decoration-emerald-500/30",
+                  isCompleted && "line-through decoration-[color:var(--color-accent-green)]/30",
                 )}
               >
                 {stage.label}

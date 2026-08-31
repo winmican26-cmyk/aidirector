@@ -3,6 +3,13 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const isDev = process.env.NODE_ENV === "development";
+const configuredApiOrigin = (() => {
+  try {
+    return process.env.NEXT_PUBLIC_API_URL ? new URL(process.env.NEXT_PUBLIC_API_URL).origin : "";
+  } catch {
+    return "";
+  }
+})();
 
 const cspDirectives = [
   "default-src 'self'",
@@ -13,7 +20,7 @@ const cspDirectives = [
   // Styles: allow self + inline (Tailwind inlines critical CSS)
   "style-src 'self' 'unsafe-inline'",
   // Clerk's browser worker is blob-backed; keep worker execution limited to
-  // this app and blob URLs rather than broadening script-src.
+  // this app and blob URLs. The documented Clerk requirement is worker-src.
   "worker-src 'self' blob:",
   "child-src 'self' blob:",
   // Images: allow self + data URIs + Clerk avatar CDN + R2 public bucket
@@ -26,6 +33,8 @@ const cspDirectives = [
     "https://clerk.com https://*.clerk.com https://*.clerk.accounts.dev",
     "https://sentry.io https://*.ingest.sentry.io",
     "https://api.stripe.com",
+    "https://*.r2.cloudflarestorage.com",
+    configuredApiOrigin,
     isDev ? "ws://localhost:*" : "",
   ]
     .filter(Boolean)

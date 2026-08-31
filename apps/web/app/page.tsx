@@ -303,7 +303,7 @@ export default function Home() {
         </div>
 
         <nav className="hidden md:flex items-center gap-6 text-sm" style={{ color: "var(--color-text-secondary)" }}>
-          {["Features", "Pricing", "Docs"].map((item) => (
+          {["Features", "Pricing"].map((item) => (
             <a key={item} href={`#${item.toLowerCase()}`} className="transition-colors hover:text-white">{item}</a>
           ))}
         </nav>
@@ -402,7 +402,7 @@ export default function Home() {
           <div className="mt-12 flex items-center justify-center gap-8 flex-wrap">
             {[
               { val: "FI-1→13", label: "Intelligence layers" },
-              { val: "<4 min", label: "Match to clips" },
+              { val: "3–8 min", label: "Match to clips" },
               { val: "3 ratios", label: "9:16 · 1:1 · 16:9" },
             ].map((s) => (
               <div key={s.label} className="text-center">
@@ -744,7 +744,7 @@ export default function Home() {
             Ready to direct?
           </h2>
           <p className="text-base mb-8 max-w-lg mx-auto" style={{ color: "var(--color-text-secondary)" }}>
-            Your first 5 matches are free. No credit card, no setup. Drop a file and the Director ships clips in under 4 minutes.
+            Your first 5 matches are free. No credit card, no setup. Drop a file and the Director ships clips in 3–8 minutes.
           </p>
           <SignedOut>
             <SignInButton mode="modal">
@@ -789,7 +789,7 @@ export default function Home() {
             <div>
               <div className="font-semibold mb-3 text-[10px] uppercase tracking-[0.15em]" style={{ color: "var(--color-text-tertiary)" }}>Product</div>
               <ul className="space-y-2">
-                {["Features", "Pricing", "Docs"].map((l) => (
+                {["Features", "Pricing"].map((l) => (
                   <li key={l}>
                     <a href={`#${l.toLowerCase()}`} className="footer-link">{l}</a>
                   </li>

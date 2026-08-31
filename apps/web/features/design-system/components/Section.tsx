@@ -27,11 +27,11 @@ export function Section({
     <section id={id} className={cn("space-y-6", className)}>
       {title && (
         <div className="space-y-1">
-          <h2 className="text-[30px] font-bold leading-[1.2] tracking-tight text-slate-900">
+          <h2 className="text-[30px] font-bold leading-[1.2] tracking-tight text-[color:var(--color-text-primary)]">
             {title}
           </h2>
           {description && (
-            <p className="text-base text-slate-500">{description}</p>
+            <p className="text-base text-[color:var(--color-text-secondary)]">{description}</p>
           )}
         </div>
       )}

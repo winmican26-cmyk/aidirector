@@ -22,13 +22,13 @@ const PLATFORM_LABELS: Record<string, string> = {
 };
 
 const PLATFORM_COLORS: Record<string, string> = {
-  youtube_shorts: "bg-red-50 text-red-700 border-red-200",
-  tiktok: "bg-blue-50 text-blue-700 border-blue-200",
-  instagram_reels: "bg-purple-50 text-purple-700 border-purple-200",
-  twitter: "bg-sky-50 text-sky-700 border-sky-200",
-  linkedin: "bg-blue-50 text-blue-700 border-blue-200",
-  facebook: "bg-indigo-50 text-indigo-700 border-indigo-200",
-  snapchat: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  youtube_shorts: "bg-[color:var(--color-status-failed)]/10 text-[color:var(--color-status-failed)] border-[color:var(--color-status-failed)]/30",
+  tiktok: "bg-[color:var(--color-status-running)]/10 text-[color:var(--color-status-running)] border-[color:var(--color-status-running)]/30",
+  instagram_reels: "bg-[color:var(--color-accent-magenta)]/10 text-[color:var(--color-accent-magenta)] border-[color:var(--color-accent-magenta)]/30",
+  twitter: "bg-[color:var(--color-status-running)]/10 text-[color:var(--color-status-running)] border-[color:var(--color-status-running)]/30",
+  linkedin: "bg-[color:var(--color-status-running)]/10 text-[color:var(--color-status-running)] border-[color:var(--color-status-running)]/30",
+  facebook: "bg-[color:var(--color-status-running)]/10 text-[color:var(--color-status-running)] border-[color:var(--color-status-running)]/30",
+  snapchat: "bg-[color:var(--color-status-warning)]/10 text-[color:var(--color-status-warning)] border-[color:var(--color-status-warning)]/30",
 };
 
 /**
@@ -42,7 +42,7 @@ const PLATFORM_COLORS: Record<string, string> = {
  */
 export function PlatformBadge({ platform, className }: PlatformBadgeProps) {
   const label = PLATFORM_LABELS[platform] ?? platform;
-  const color = PLATFORM_COLORS[platform] ?? "bg-slate-100 text-slate-600 border-slate-200";
+  const color = PLATFORM_COLORS[platform] ?? "bg-[color:var(--color-surface-2)] text-[color:var(--color-text-secondary)] border-[color:var(--color-border-strong)]";
 
   return (
     <span

@@ -30,7 +30,9 @@ export type JobStatus =
   | "running"
   | "succeeded"
   | "failed"
-  | "cancelled";
+  | "cancelled"
+  | "retrying"
+  | "expired";
 
 export type RenderJobStatus =
   | "queued"
@@ -260,6 +262,14 @@ export interface RankingSnapshot {
   explanation: string;
   snapshot_metadata: Record<string, unknown>;
   created_at: string;
+}
+
+/** Presigned download URL for a render output (GET /api/exports/{id}/url). */
+export interface ExportUrl {
+  url: string;
+  expires_in_seconds: number;
+  render_output_id: string;
+  r2_key: string;
 }
 
 // --- Brief templates -------------------------------------------------------

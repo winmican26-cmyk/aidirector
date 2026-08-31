@@ -8,7 +8,9 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     include: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
-    exclude: ["node_modules", ".next"],
+    // Playwright specs are executed by the dedicated Playwright runner.
+    // Keeping them out of Vitest prevents cross-runner errors in `pnpm test`.
+    exclude: ["node_modules", ".next", "e2e/**", "**/*.e2e.{ts,tsx}"],
     setupFiles: ["./lib/__tests__/setup.ts"],
     css: false,
   },

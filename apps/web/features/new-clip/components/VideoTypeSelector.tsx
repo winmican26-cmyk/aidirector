@@ -17,7 +17,7 @@ interface VideoTypeSelectorProps {
 export function VideoTypeSelector({ value, onChange }: VideoTypeSelectorProps) {
   return (
     <section>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-[color:var(--color-text-primary)]">
         What type of video is this?
       </h2>
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -30,7 +30,7 @@ export function VideoTypeSelector({ value, onChange }: VideoTypeSelectorProps) {
           >
             <div className="flex flex-col items-center text-center gap-2">
               <span className="text-3xl">{opt.emoji}</span>
-              <span className="text-base font-medium text-slate-800">
+              <span className="text-base font-medium text-[color:var(--color-text-primary)]">
                 {opt.label}
               </span>
             </div>

@@ -22,11 +22,11 @@ const SIZE_CLASSES: Record<ButtonSize, string> = {
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary:
-    "bg-emerald-500 text-white font-medium hover:bg-emerald-600 active:bg-emerald-700 shadow-sm hover:shadow-md",
+    "bg-gradient-to-b from-[color:var(--color-accent-green)] to-[color:var(--color-accent-green-dim)] text-[color:var(--color-text-inverse)] font-medium hover:saturate-125 active:translate-y-[1px] shadow-[0_1px_0_rgba(255,255,255,0.25)_inset,0_8px_24px_-8px_rgba(0,230,161,0.6)]",
   secondary:
-    "bg-white border-2 border-slate-200 text-slate-700 font-medium hover:border-slate-300 hover:bg-slate-50 active:bg-slate-100",
+    "bg-[color:var(--color-surface-2)] border-2 border-[color:var(--color-border-strong)] text-[color:var(--color-text-primary)] font-medium hover:border-[color:var(--color-border-accent)] hover:bg-[color:var(--color-surface-3)] active:bg-[color:var(--color-surface-3)]",
   ghost:
-    "bg-transparent text-slate-600 font-medium hover:text-slate-900 hover:bg-slate-100 active:bg-slate-200",
+    "bg-transparent text-[color:var(--color-text-secondary)] font-medium hover:text-[color:var(--color-text-primary)] hover:bg-[color:var(--color-surface-1)] active:bg-[color:var(--color-surface-2)]",
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

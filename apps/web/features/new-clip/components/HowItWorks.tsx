@@ -41,13 +41,13 @@ export function HowItWorks() {
       <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {STEPS.map((step) => (
           <Card key={step.title} dense className="text-center">
-            <div className="mx-auto h-12 w-12 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center">
-              <AppIcon name={step.icon} size="lg" className="text-emerald-500" strokeWidth={2} />
+            <div className="mx-auto h-12 w-12 rounded-xl bg-[color:var(--color-accent-green)]/10 border border-[color:var(--color-border-accent)] flex items-center justify-center">
+              <AppIcon name={step.icon} size="lg" className="text-[color:var(--color-accent-green)]" strokeWidth={2} />
             </div>
-            <p className="mt-4 text-lg font-semibold text-slate-900">
+            <p className="mt-4 text-lg font-semibold text-[color:var(--color-text-primary)]">
               {step.title}
             </p>
-            <p className="mt-2 text-sm text-slate-500 leading-relaxed">
+            <p className="mt-2 text-sm text-[color:var(--color-text-secondary)] leading-relaxed">
               {step.description}
             </p>
           </Card>

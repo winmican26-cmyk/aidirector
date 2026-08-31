@@ -23,6 +23,19 @@ export function DirectorReviewWorkspace({ jobId }: Props) {
   const { endpoints } = useApi();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
+  const plan = view?.director_plan;
+  const candidatesById = useMemo(
+    () => new Map<string, ClipCandidate>(
+      (view?.candidates ?? []).map((c: ClipCandidate) => [c.id, c] as [string, ClipCandidate]),
+    ),
+    [view?.candidates],
+  );
+  const snapshotsByCandidate = useMemo(() => {
+    const map = new Map<string, RankingSnapshot>();
+    for (const snap of view?.snapshots ?? []) map.set(snap.candidate_id, snap);
+    return map;
+  }, [view?.snapshots]);
+
   if (loading || !view) {
     return (
       <Surface variant="card" className="text-center py-12 text-sm text-[color:var(--color-text-tertiary)]">
@@ -30,16 +43,6 @@ export function DirectorReviewWorkspace({ jobId }: Props) {
       </Surface>
     );
   }
-
-  const plan = view.director_plan;
-  const candidatesById = new Map<string, ClipCandidate>(
-    view.candidates.map((c: ClipCandidate) => [c.id, c] as [string, ClipCandidate]),
-  );
-  const snapshotsByCandidate = useMemo(() => {
-    const map = new Map<string, RankingSnapshot>();
-    for (const snap of view.snapshots) map.set(snap.candidate_id, snap);
-    return map;
-  }, [view.snapshots]);
 
   // Wire the action buttons to the API and/or show feedback
   const handleApprove = async (candidateId: string) => {

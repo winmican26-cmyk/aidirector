@@ -81,7 +81,7 @@ export function ProgressIndicator({
           cy={center}
           r={radius}
           fill="none"
-          stroke="#E2E8F0"
+          stroke="var(--color-border-strong)"
           strokeWidth={stroke}
         />
 
@@ -95,7 +95,7 @@ export function ProgressIndicator({
             stroke="currentColor"
             strokeWidth={stroke}
             strokeLinecap="round"
-            className="text-emerald-500"
+            className="text-[color:var(--color-accent-green)]"
             strokeDasharray={`${circumference * 0.3} ${circumference * 0.7}`}
             strokeDashoffset={circumference * 0.15}
           />
@@ -108,7 +108,7 @@ export function ProgressIndicator({
             stroke="currentColor"
             strokeWidth={stroke}
             strokeLinecap="round"
-            className="text-emerald-500 transition-all duration-500 motion-safe:transition-all motion-safe:duration-500"
+            className="text-[color:var(--color-accent-green)] transition-all duration-500 motion-safe:transition-all motion-safe:duration-500"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             style={{
@@ -122,7 +122,7 @@ export function ProgressIndicator({
       {showPercentage && !isIndeterminate && (
         <span
           className={cn(
-            "absolute font-semibold text-slate-900",
+            "absolute font-semibold text-[color:var(--color-text-primary)]",
             config.fontSize,
           )}
           aria-hidden="true"
@@ -135,7 +135,7 @@ export function ProgressIndicator({
       {showPercentage && isIndeterminate && (
         <span
           className={cn(
-            "absolute font-semibold text-slate-400",
+            "absolute font-semibold text-[color:var(--color-text-tertiary)]",
             config.fontSize,
           )}
           aria-hidden="true"

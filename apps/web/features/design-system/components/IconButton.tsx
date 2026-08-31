@@ -28,10 +28,10 @@ const ICON_SIZES = {
 
 const VARIANT_CLASSES = {
   default:
-    "bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-300",
-  ghost: "bg-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-100",
+    "bg-[color:var(--color-surface-2)] border border-[color:var(--color-border-strong)] text-[color:var(--color-text-secondary)] hover:bg-[color:var(--color-surface-3)] hover:border-[color:var(--color-border-accent)]",
+  ghost: "bg-transparent text-[color:var(--color-text-tertiary)] hover:text-[color:var(--color-text-primary)] hover:bg-[color:var(--color-surface-2)]",
   primary:
-    "bg-emerald-500 text-white hover:bg-emerald-600 active:bg-emerald-700",
+    "bg-[color:var(--color-accent-green)] text-[color:var(--color-text-inverse)] hover:bg-[color:var(--color-accent-green-dim)] active:bg-[color:var(--color-accent-green-dim)]",
 };
 
 /**

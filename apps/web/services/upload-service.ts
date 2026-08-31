@@ -25,7 +25,7 @@ export async function processUpload(
   file: File,
   sport: string,
   dispatch: UploadDispatchFn,
-): Promise<void> {
+): Promise<string | null> {
   // ── 1. Presign ────────────────────────────────────────────────────────
   dispatch(entryId, { type: "PRESIGN_REQUESTED" });
 
@@ -40,7 +40,7 @@ export async function processUpload(
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Presign request failed";
     dispatch(entryId, { type: "PRESIGN_FAILED", error: msg });
-    return;
+    return null;
   }
 
   dispatch(entryId, {
@@ -57,7 +57,7 @@ export async function processUpload(
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "File upload failed";
     dispatch(entryId, { type: "UPLOAD_FAILED", error: msg });
-    return;
+    return null;
   }
 
   dispatch(entryId, { type: "UPLOAD_OK" });
@@ -68,23 +68,25 @@ export async function processUpload(
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Complete upload failed";
     dispatch(entryId, { type: "PIPELINE_FAILED", error: msg, stage: "uploaded" });
-    return;
+    return null;
   }
 
+  let job: Awaited<ReturnType<Endpoints["createJob"]>>;
   try {
-    await endpoints.createJob({
+    job = await endpoints.createJob({
       upload_id: presignResult.upload_id,
       intent: "analyze",
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Job creation failed";
     dispatch(entryId, { type: "PIPELINE_FAILED", error: msg, stage: "uploaded" });
-    return;
+    return null;
   }
 
   // Front-end pipeline states after this point are driven by backend
   // workers and reflected via job-event polling.
   dispatch(entryId, { type: "ANALYSIS_STARTED" });
+  return job.id;
 }
 
 /**

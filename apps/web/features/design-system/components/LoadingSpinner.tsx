@@ -30,7 +30,7 @@ export function LoadingSpinner({
       className={cn("inline-flex items-center justify-center", className)}
     >
       <svg
-        className={cn("animate-spin text-emerald-500", SIZE_CLASSES[size])}
+        className={cn("animate-spin text-[color:var(--color-accent-green)]", SIZE_CLASSES[size])}
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"

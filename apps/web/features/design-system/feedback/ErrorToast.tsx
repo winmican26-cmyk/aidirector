@@ -67,7 +67,7 @@ export function ErrorToast({
       role="alert"
       aria-live="assertive"
       className={cn(
-        "fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 shadow-lg transition-all duration-200",
+        "fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-[color:var(--color-status-failed)]/30 bg-[color:var(--color-status-failed)]/10 px-5 py-4 shadow-[var(--shadow-elevated)] transition-all duration-200",
         animating
           ? "translate-y-0 opacity-100"
           : "translate-y-4 opacity-0",
@@ -77,9 +77,9 @@ export function ErrorToast({
       <AppIcon
         name="alertCircle"
         size="md"
-        className="text-red-500 shrink-0"
+        className="text-[color:var(--color-status-failed)] shrink-0"
       />
-      <p className="text-sm font-medium text-red-900">{message}</p>
+      <p className="text-sm font-medium text-[color:var(--color-text-primary)]">{message}</p>
       {onDismiss && (
         <button
           onClick={() => {
@@ -89,7 +89,7 @@ export function ErrorToast({
               onDismiss();
             }, 200);
           }}
-          className="ml-2 shrink-0 rounded-lg p-1 text-red-600 hover:bg-red-100 transition-colors"
+          className="ml-2 shrink-0 rounded-lg p-1 text-[color:var(--color-status-failed)] hover:bg-[color:var(--color-status-failed)]/15 transition-colors"
           aria-label="Dismiss"
         >
           <AppIcon name="x" size="sm" />

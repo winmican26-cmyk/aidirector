@@ -36,8 +36,8 @@ export function SelectionCard({
       className={cn(
         "relative w-full rounded-2xl border-2 px-5 py-5 text-left transition-all duration-200",
         selected
-          ? "border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500/20"
-          : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm",
+          ? "border-[color:var(--color-accent-green)] bg-[color:var(--color-accent-green)]/10 ring-1 ring-[color:var(--color-accent-green)]/20"
+          : "border-[color:var(--color-border-strong)] bg-[color:var(--color-surface-2)] hover:border-[color:var(--color-border-accent)] hover:shadow-[var(--shadow-card-hover)]",
         disabled && "cursor-not-allowed opacity-50",
         className,
       )}

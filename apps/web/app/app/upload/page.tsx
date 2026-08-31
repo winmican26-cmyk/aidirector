@@ -4,6 +4,9 @@ import { useState, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PageContainer, Typography, AppIcon } from "@/features/design-system";
 import { analytics } from "@/services/analytics";
+import { processUpload } from "@/services/upload-service";
+import { useApi } from "@/lib/api/runtime";
+import { useUploadQueue } from "@/stores/upload-queue";
 import { toast } from "@/stores/toast-store";
 import { HeroUpload } from "@/features/new-clip/components/HeroUpload";
 import { RecentUploads } from "@/features/new-clip/components/RecentUploads";
@@ -53,6 +56,9 @@ export default function NewClipPage() {
   const [platforms, setPlatforms] = useState<string[]>(["youtube_shorts"]);
   const [clipCount, setClipCount] = useState(12);
   const [loading, setLoading] = useState(false);
+  const { endpoints, mode } = useApi();
+  const enqueue = useUploadQueue((state) => state.enqueue);
+  const dispatch = useUploadQueue((state) => state.dispatch);
 
   // Track that user started using the product
   useEffect(() => {
@@ -82,31 +88,49 @@ export default function NewClipPage() {
     };
   }, []);
 
-  const handleFileSelected = useCallback((f: File) => {
+  const handleFileSelected = useCallback((f: File | null) => {
     setFile(f);
+    if (!f) return;
     analytics.track("upload_completed", { fileName: f.name, fileSize: f.size });
   }, []);
 
-  const handleCreateClips = useCallback(() => {
+  const handleCreateClips = useCallback(async () => {
     if (!file) return;
+    if (mode !== "live" || !endpoints) {
+      toast.error("Processing unavailable", "A live API connection is required to create a job.");
+      return;
+    }
     setLoading(true);
     analytics.track("processing_started", { clipCount, platforms });
-    // Navigate to processing screen — the real upload happens there
-    router.push("/app/processing" as never);
-  }, [file, clipCount, platforms, router]);
+    const entry = enqueue({
+      fileName: file.name,
+      fileSize: file.size,
+      file,
+      sport: videoType ?? "football",
+      platformTargets: platforms,
+    });
+    dispatch(entry.id, { type: "FILE_SELECTED", file });
+    const jobId = await processUpload(endpoints, entry.id, file, videoType ?? "football", dispatch);
+    if (jobId) {
+      router.push(`/app/processing?job_id=${encodeURIComponent(jobId)}` as never);
+    } else {
+      setLoading(false);
+      toast.error("Upload failed", "The video could not be prepared for processing.");
+    }
+  }, [dispatch, endpoints, enqueue, file, clipCount, mode, platforms, router, videoType]);
 
   return (
     <PageContainer className="space-y-12 md:space-y-16">
       {/* Offline warning */}
       {offline && (
         <div
-          className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4"
+          className="flex items-center gap-3 rounded-2xl border border-[color:var(--color-status-warning)]/30 bg-[color:var(--color-status-warning)]/10 px-5 py-4"
           role="alert"
         >
-          <AppIcon name="alertCircle" size="md" className="text-amber-500 shrink-0" />
+          <AppIcon name="alertCircle" size="md" className="text-[color:var(--color-status-warning)] shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-amber-900">You&apos;re offline</p>
-            <p className="text-sm text-amber-700">
+            <p className="text-sm font-semibold text-[color:var(--color-status-warning)]">You&apos;re offline</p>
+            <p className="text-sm text-[color:var(--color-text-secondary)]">
               Uploads are disabled until your connection is restored. Your projects will be
               saved locally.
             </p>
@@ -158,7 +182,7 @@ export default function NewClipPage() {
       <Footer />
 
       {/* First-run onboarding overlay */}
-      <OnboardingOverlay />
+      <OnboardingOverlay dismissOnInteraction={file !== null} />
     </PageContainer>
   );
 }

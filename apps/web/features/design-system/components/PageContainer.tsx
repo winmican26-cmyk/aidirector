@@ -22,7 +22,7 @@ export function PageContainer({
   maxWidth = "1100px",
 }: PageContainerProps) {
   return (
-    <div className="bg-[#F8FAFC] min-h-screen">
+    <div className="min-h-screen bg-[color:var(--color-surface-0)]">
       <div
         className={cn(
           "mx-auto px-6 py-12 md:py-16",

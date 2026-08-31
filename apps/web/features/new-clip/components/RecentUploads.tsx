@@ -19,8 +19,8 @@ export function RecentUploads({ uploads }: RecentUploadsProps) {
   return (
     <Card>
       <div className="flex items-center gap-2 mb-4">
-        <AppIcon name="clock" size="sm" className="text-slate-400" strokeWidth={2} />
-        <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">
+        <AppIcon name="clock" size="sm" className="text-[color:var(--color-text-tertiary)]" strokeWidth={2} />
+        <h2 className="text-sm font-semibold text-[color:var(--color-text-primary)] uppercase tracking-wider">
           Continue Working
         </h2>
       </div>
@@ -30,20 +30,20 @@ export function RecentUploads({ uploads }: RecentUploadsProps) {
           <button
             key={upload.id}
             type="button"
-            className="flex w-full items-center justify-between gap-4 rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-3 transition-colors hover:bg-slate-100 hover:border-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 text-left"
+            className="flex w-full items-center justify-between gap-4 rounded-xl border border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-1)]/50 px-4 py-3 transition-colors hover:bg-[color:var(--color-surface-2)] hover:border-[color:var(--color-border-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-green)]/50 text-left"
           >
             <div className="flex items-center gap-3 min-w-0">
               <span className="text-xl shrink-0">{upload.emoji}</span>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-slate-900 truncate">
+                <p className="text-sm font-medium text-[color:var(--color-text-primary)] truncate">
                   {upload.title}
                 </p>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-[color:var(--color-text-tertiary)] mt-0.5">
                   {upload.subtitle}
                 </p>
               </div>
             </div>
-            <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 shrink-0">
+            <span className="flex items-center gap-1 text-xs font-medium text-[color:var(--color-accent-green)] shrink-0">
               Resume
               <AppIcon name="arrowRight" size="xs" strokeWidth={2} />
             </span>

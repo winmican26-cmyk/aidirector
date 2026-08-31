@@ -8,6 +8,7 @@ import type {
   BriefTemplate,
   BriefTemplateCreate,
   DirectorPlan,
+  ExportUrl,
   Job,
   JobEvents,
   JobView,
@@ -98,6 +99,15 @@ export class Endpoints {
    */
   getJobEvents(jobId: string) {
     return this.client.get<JobEvents>(`/api/jobs/${jobId}/events`);
+  }
+
+  // --- Exports -------------------------------------------------------------
+  /**
+   * Resolve a 1-hour presigned download URL for a render output.
+   * The response also carries provenance headers (see backend exports router).
+   */
+  getExportUrl(renderOutputId: string) {
+    return this.client.get<ExportUrl>(`/api/exports/${renderOutputId}/url`);
   }
 
   // --- DSR (GDPR) -------------------------------------------------------

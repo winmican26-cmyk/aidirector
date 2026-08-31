@@ -44,7 +44,7 @@ const STEPS = [
  * Dismissed permanently via localStorage. Can be reset by clearing
  * browser storage or calling `resetOnboarding()`.
  */
-export function OnboardingOverlay() {
+export function OnboardingOverlay({ dismissOnInteraction = false }: { dismissOnInteraction?: boolean }) {
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState(0);
   const [dismissed, setDismissed] = useState(true);
@@ -72,6 +72,10 @@ export function OnboardingOverlay() {
       // Storage unavailable
     }
   }, []);
+
+  useEffect(() => {
+    if (dismissOnInteraction && !dismissed) handleDismiss();
+  }, [dismissOnInteraction, dismissed, handleDismiss]);
 
   const handleNext = useCallback(() => {
     if (step < STEPS.length - 1) {
@@ -113,7 +117,7 @@ export function OnboardingOverlay() {
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
         transition={{ duration: 0.25, ease: [0.2, 0.8, 0.2, 1] }}
         className={cn(
-          "relative z-10 w-full max-w-md rounded-2xl bg-white border border-slate-200 shadow-xl p-8 text-center",
+          "relative z-10 w-full max-w-md rounded-2xl bg-[color:var(--color-surface-2)] border border-[color:var(--color-border-strong)] shadow-[var(--shadow-elevated)] p-8 text-center",
         )}
       >
         {/* Step indicator dots */}
@@ -124,8 +128,8 @@ export function OnboardingOverlay() {
               className={cn(
                 "h-2 rounded-full transition-all duration-250",
                 i === step
-                  ? "w-8 bg-emerald-500"
-                  : "w-2 bg-slate-200",
+                  ? "w-8 bg-[color:var(--color-accent-green)]"
+                  : "w-2 bg-[color:var(--color-surface-3)]",
               )}
             />
           ))}
@@ -141,11 +145,11 @@ export function OnboardingOverlay() {
             transition={{ duration: 0.2 }}
             className="flex flex-col items-center"
           >
-            <div className="mx-auto h-16 w-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mb-5">
+            <div className="mx-auto h-16 w-16 rounded-2xl bg-[color:var(--color-accent-green)]/10 border border-[color:var(--color-border-accent)] flex items-center justify-center mb-5">
               <AppIcon
                 name={current.icon}
                 size="2xl"
-                className="text-emerald-500"
+                className="text-[color:var(--color-accent-green)]"
                 strokeWidth={1.5}
               />
             </div>
@@ -153,14 +157,14 @@ export function OnboardingOverlay() {
             <Typography
               id="onboarding-title"
               variant="title"
-              className="text-slate-900 mb-2"
+              className="text-[color:var(--color-text-primary)] mb-2"
             >
               {current.title}
             </Typography>
 
             <Typography
               variant="small"
-              className="text-slate-500 max-w-xs mx-auto"
+              className="text-[color:var(--color-text-secondary)] max-w-xs mx-auto"
             >
               {current.description}
             </Typography>
@@ -176,8 +180,8 @@ export function OnboardingOverlay() {
             className={cn(
               "rounded-xl px-4 py-2.5 text-sm font-medium transition-colors",
               step === 0
-                ? "text-slate-300 cursor-not-allowed"
-                : "text-slate-600 hover:bg-slate-100",
+                ? "text-[color:var(--color-text-muted)] cursor-not-allowed"
+                : "text-[color:var(--color-text-secondary)] hover:bg-[color:var(--color-surface-2)]",
             )}
             aria-label="Previous step"
           >
@@ -187,7 +191,7 @@ export function OnboardingOverlay() {
           <button
             type="button"
             onClick={handleNext}
-            className="rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-emerald-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+            className="rounded-xl bg-gradient-to-b from-[color:var(--color-accent-green)] to-[color:var(--color-accent-green-dim)] px-6 py-2.5 text-sm font-medium text-[color:var(--color-text-inverse)] hover:saturate-125 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-green)]/50"
           >
             {isLast ? "Get Started" : "Next"}
           </button>
@@ -197,7 +201,7 @@ export function OnboardingOverlay() {
         <button
           type="button"
           onClick={handleDismiss}
-          className="mt-4 text-xs text-slate-400 hover:text-slate-600 transition-colors underline underline-offset-2"
+          className="mt-4 text-xs text-[color:var(--color-text-tertiary)] hover:text-[color:var(--color-text-primary)] transition-colors underline underline-offset-2"
         >
           Skip tutorial
         </button>

@@ -68,7 +68,7 @@ export function SuccessToast({
       role="status"
       aria-live="polite"
       className={cn(
-        "fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 shadow-lg transition-all duration-200",
+        "fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-[color:var(--color-status-succeeded)]/30 bg-[color:var(--color-status-succeeded)]/10 px-5 py-4 shadow-[var(--shadow-elevated)] transition-all duration-200",
         animating
           ? "translate-y-0 opacity-100"
           : "translate-y-4 opacity-0",
@@ -78,9 +78,9 @@ export function SuccessToast({
       <AppIcon
         name="checkCircle"
         size="md"
-        className="text-emerald-500 shrink-0"
+        className="text-[color:var(--color-status-succeeded)] shrink-0"
       />
-      <p className="text-sm font-medium text-emerald-900">{message}</p>
+      <p className="text-sm font-medium text-[color:var(--color-text-primary)]">{message}</p>
       {onDismiss && (
         <button
           onClick={() => {
@@ -90,7 +90,7 @@ export function SuccessToast({
               onDismiss();
             }, 200);
           }}
-          className="ml-2 shrink-0 rounded-lg p-1 text-emerald-600 hover:bg-emerald-100 transition-colors"
+          className="ml-2 shrink-0 rounded-lg p-1 text-[color:var(--color-status-succeeded)] hover:bg-[color:var(--color-status-succeeded)]/15 transition-colors"
           aria-label="Dismiss"
         >
           <AppIcon name="x" size="sm" />

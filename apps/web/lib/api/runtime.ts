@@ -22,7 +22,7 @@
  * dormant outside of local dev.
  */
 import { useAuth } from "@clerk/nextjs";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { ApiClient } from "./client";
 import { Endpoints } from "./endpoints";
 import { analytics } from "@/services/analytics";
@@ -50,9 +50,11 @@ export function useApi(): UseApi {
   const mode = getRuntimeMode();
   const baseUrl = getApiBaseUrl();
 
-  useMemo(() => {
-    if (mode === "live") analytics.configureBackend({ baseUrl, getToken });
-    return null;
+  useEffect(() => {
+    if (mode !== "live") return;
+    analytics.configureBackend({ baseUrl, getToken });
+    // Retry delivery of any events queued while offline.
+    void analytics.flush();
   }, [mode, baseUrl, getToken]);
 
   const endpoints = useMemo<Endpoints | null>(() => {

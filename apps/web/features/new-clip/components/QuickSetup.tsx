@@ -41,7 +41,7 @@ export function QuickSetup({
       <VideoTypeSelector value={videoType} onChange={onVideoTypeChange} />
 
       {/* Divider */}
-      <div className="border-t border-slate-100" />
+      <div className="border-t border-[color:var(--color-border-soft)]" />
 
       {/* Platforms */}
       <PlatformSelector
@@ -51,7 +51,7 @@ export function QuickSetup({
       />
 
       {/* Divider */}
-      <div className="border-t border-slate-100" />
+      <div className="border-t border-[color:var(--color-border-soft)]" />
 
       {/* Clip count */}
       <ClipCountSelector
@@ -62,7 +62,7 @@ export function QuickSetup({
       />
 
       {/* Divider */}
-      <div className="border-t border-slate-100" />
+      <div className="border-t border-[color:var(--color-border-soft)]" />
 
       {/* CTA */}
       <PrimaryButton

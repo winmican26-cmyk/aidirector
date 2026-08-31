@@ -13,6 +13,7 @@
  */
 import type { Endpoints } from "@/lib/api/endpoints";
 import type { JobEvents, JobView } from "@/lib/api/types";
+import type { JobStatus } from "@/lib/api/types";
 import { config } from "@/config";
 
 export type JobEvent =
@@ -34,6 +35,7 @@ export class PollingTransport implements JobEventTransport {
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
     let lastRevision: number | null = null;
+    const terminalStatuses = new Set<JobStatus>(["succeeded", "failed", "cancelled", "expired"]);
 
     const refetchView = async () => {
       try {
@@ -50,6 +52,10 @@ export class PollingTransport implements JobEventTransport {
         const events = await this.endpoints.getJobEvents(jobId);
         if (cancelled) return;
         onEvent({ type: "events", events });
+        if (terminalStatuses.has(events.status)) {
+          cancelled = true;
+          return;
+        }
         if (lastRevision === null || events.revision !== lastRevision) {
           lastRevision = events.revision;
           await refetchView();

@@ -108,9 +108,11 @@ export function FeedbackWidget() {
     analytics.track("feedback_submitted", {
       easyToUse: answers.easy_to_use,
       usefulClips: answers.useful_clips,
-      hasConfusion: answers.confusion.length > 0,
-      hasImprovements: answers.improvements.length > 0,
+      confusion: answers.confusion,
+      improvements: answers.improvements,
     });
+    // Send the submission to the backend now (not only on next app open).
+    void analytics.flush();
 
     // Simulate brief submission delay
     setTimeout(() => {
@@ -134,7 +136,7 @@ export function FeedbackWidget() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-3 text-sm font-medium text-white shadow-lg hover:bg-emerald-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 duration-250"
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full bg-gradient-to-b from-[color:var(--color-accent-green)] to-[color:var(--color-accent-green-dim)] px-5 py-3 text-sm font-medium text-[color:var(--color-text-inverse)] shadow-[0_1px_0_rgba(255,255,255,0.25)_inset,0_8px_24px_-8px_rgba(0,230,161,0.6)] hover:saturate-125 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-green)]/50 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 duration-250"
           aria-label="Give feedback"
         >
           <AppIcon name="messageCircle" size="sm" />
@@ -160,7 +162,7 @@ export function FeedbackWidget() {
           {/* Modal */}
           <div
             className={cn(
-              "relative z-10 w-full max-w-lg rounded-2xl bg-white border border-slate-200 shadow-xl p-6",
+              "relative z-10 w-full max-w-lg rounded-2xl bg-[color:var(--color-surface-1)] border-[color:var(--color-border-strong)] shadow-[var(--shadow-elevated)] p-6",
               "motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 duration-200",
             )}
           >
@@ -168,14 +170,14 @@ export function FeedbackWidget() {
             <div className="flex items-center justify-between mb-6">
               <h2
                 id="feedback-title"
-                className="text-lg font-semibold text-slate-900"
+                className="text-lg font-semibold text-[color:var(--color-text-primary)]"
               >
                 How&apos;s it going?
               </h2>
               <button
                 type="button"
                 onClick={handleDismiss}
-                className="rounded-lg p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                className="rounded-lg p-1.5 text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text-secondary)] hover:bg-[color:var(--color-surface-2)] transition-colors"
                 aria-label="Close feedback"
               >
                 <AppIcon name="x" size="sm" />
@@ -186,7 +188,7 @@ export function FeedbackWidget() {
             <div className="space-y-6">
               {QUESTIONS.map((q) => (
                 <div key={q.id}>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-[color:var(--color-text-secondary)] mb-2">
                     {q.label}
                   </label>
 
@@ -204,8 +206,8 @@ export function FeedbackWidget() {
                             className={cn(
                               "flex h-10 w-10 items-center justify-center rounded-lg border-2 text-sm font-medium transition-all",
                               selected
-                                ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                                : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-700",
+                                ? "border-[color:var(--color-accent-green)] bg-[color:var(--color-accent-green)]/10 text-[color:var(--color-accent-green)]"
+                                : "border-[color:var(--color-border-strong)] bg-[color:var(--color-surface-2)] text-[color:var(--color-text-secondary)] hover:border-[color:var(--color-border-accent)] hover:text-[color:var(--color-accent-green)]",
                             )}
                             aria-label={`${value} — ${RATING_LABELS[value - 1]}`}
                           >
@@ -213,7 +215,7 @@ export function FeedbackWidget() {
                           </button>
                         );
                       })}
-                      <span className="ml-2 text-xs text-slate-400">
+                      <span className="ml-2 text-xs text-[color:var(--color-text-muted)]">
                         {(answers[q.id as keyof FeedbackAnswers] as number) > 0
                           ? RATING_LABELS[(answers[q.id as keyof FeedbackAnswers] as number) - 1]
                           : ""}
@@ -227,7 +229,7 @@ export function FeedbackWidget() {
                         handleText(q.id as keyof FeedbackAnswers, e.target.value)
                       }
                       placeholder={q.placeholder}
-                      className="w-full rounded-xl border-2 border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition-colors focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/20"
+                      className="w-full rounded-xl border-2 border-[color:var(--color-border-strong)] bg-[color:var(--color-surface-2)] px-4 py-2.5 text-sm text-[color:var(--color-text-primary)] placeholder:text-[color:var(--color-text-muted)] transition-colors focus:border-[color:var(--color-accent-green)] focus:outline-none focus:ring-1 focus:ring-[color:var(--color-accent-green)]/20"
                       aria-label={q.label}
                     />
                   )}
@@ -240,7 +242,7 @@ export function FeedbackWidget() {
               <button
                 type="button"
                 onClick={handleDismiss}
-                className="rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors"
+                className="rounded-xl px-4 py-2.5 text-sm font-medium text-[color:var(--color-text-secondary)] hover:bg-[color:var(--color-surface-2)] transition-colors"
               >
                 Skip
               </button>
@@ -248,7 +250,7 @@ export function FeedbackWidget() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-600 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+                className="rounded-xl bg-[color:var(--color-accent-green)] px-5 py-2.5 text-sm font-medium text-[color:var(--color-text-inverse)] hover:bg-[color:var(--color-accent-green-dim)] transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-green)]/50"
               >
                 {submitting ? "Sending..." : "Send Feedback"}
               </button>

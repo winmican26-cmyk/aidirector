@@ -87,11 +87,11 @@ function Funnel({ events }: { events: AnalyticsEvent[] }) {
           return (
             <div key={stage.label}>
               <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-slate-700">{stage.label}</span>
-                <span className="font-mono text-slate-500">{stage.value} · {index ? `${conversion}%` : "base"}</span>
+                <span className="font-medium text-[color:var(--color-text-primary)]">{stage.label}</span>
+                <span className="font-mono text-[color:var(--color-text-secondary)]">{stage.value} · {index ? `${conversion}%` : "base"}</span>
               </div>
-              <div className="mt-1 h-2 rounded-full bg-slate-100">
-                <div className="h-2 rounded-full bg-emerald-500" style={{ width: `${Math.min(100, Math.max(4, conversion))}%` }} />
+              <div className="mt-1 h-2 rounded-full bg-[color:var(--color-surface-3)]">
+                <div className="h-2 rounded-full bg-[color:var(--color-accent-green)]" style={{ width: `${Math.min(100, Math.max(4, conversion))}%` }} />
               </div>
             </div>
           );
@@ -161,7 +161,7 @@ export default function BetaDashboardPage() {
 
   return (
     <PageContainer>
-      <div className="flex flex-col gap-4 border-b border-slate-200 pb-6 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-col gap-4 border-b border-[color:var(--color-border-strong)] pb-6 md:flex-row md:items-end md:justify-between">
         <div>
           <div className="flex flex-wrap gap-2"><Badge variant={metrics.score >= 80 ? "success" : metrics.score >= 60 ? "warning" : "error"}>Beta readiness · {metrics.score}%</Badge><Badge variant={dataSource === "first_party_backend" ? "success" : "warning"}>{dataSource === "first_party_backend" ? "Aggregated backend data" : "Local fallback data"}</Badge></div>
           <Typography variant="hero" className="mt-3">Beta Operations</Typography>
@@ -178,7 +178,7 @@ export default function BetaDashboardPage() {
         <div className="grid gap-6 xl:grid-cols-2"><Funnel events={events} /><Card><Typography variant="title">Feedback</Typography><div className="mt-5 grid gap-4 sm:grid-cols-2"><Metric label="Average rating" value="—" /><Metric label="Feedback count" value={`${eventCount(events, "feedback_submitted")}`} /><Metric label="Top requested features" value="—" /><Metric label="Common complaints" value="—" /></div><Typography variant="small" className="mt-5">Recent comments require a server-backed feedback provider.</Typography></Card></div>
         <MetricGrid title="Stability" metrics={[{ label: "Runtime errors", value: "—" }, { label: "Processing failures", value: `${eventCount(events, "processing_failed")}` }, { label: "Upload failures", value: `${eventCount(events, "upload_failed")}` }, { label: "CSP violations", value: "0" }, { label: "Network failures", value: `${eventCount(events, "network_failure")}` }, { label: "Offline events", value: `${eventCount(events, "offline_event")}` }]} />
         <MetricGrid title="Performance" metrics={[{ label: "Average page load", value: "—" }, { label: "Largest Contentful Paint", value: "—" }, { label: "Average processing latency", value: formatDuration(events, "processing_started", "processing_completed") }, { label: "Slowest page", value: "—" }, { label: "Average session duration", value: "—" }]} />
-        <Card><Typography variant="title">Recent Activity</Typography><div className="mt-4 divide-y divide-slate-100">{events.slice(-12).reverse().map((event) => <div className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm" key={`${event.name}-${event.timestamp}`}><span className="font-medium text-slate-700">{event.name.replaceAll("_", " ")}</span><span className="font-mono text-xs text-slate-400">{new Date(event.timestamp).toLocaleString()}</span></div>)}{!events.length && <Typography variant="small">No analytics events captured in this browser yet.</Typography>}</div></Card>
+        <Card><Typography variant="title">Recent Activity</Typography><div className="mt-4 divide-y divide-[color:var(--color-border-soft)]">{events.slice(-12).reverse().map((event) => <div className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm" key={`${event.name}-${event.timestamp}`}><span className="font-medium text-[color:var(--color-text-primary)]">{event.name.replaceAll("_", " ")}</span><span className="font-mono text-xs text-[color:var(--color-text-tertiary)]">{new Date(event.timestamp).toLocaleString()}</span></div>)}{!events.length && <Typography variant="small">No analytics events captured in this browser yet.</Typography>}</div></Card>
       </div>
     </PageContainer>
   );

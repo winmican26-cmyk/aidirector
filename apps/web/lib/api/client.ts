@@ -22,6 +22,10 @@ export class ApiError extends Error {
   }
 }
 
+function isNetworkError(error: unknown): error is TypeError {
+  return error instanceof TypeError && error.message.toLowerCase().includes("fetch");
+}
+
 export interface ApiClientOptions {
   baseUrl: string;
   /** Returns a fresh Clerk JWT, or null if unauthenticated. */
@@ -76,14 +80,27 @@ export class ApiClient {
 
   async request<T>(path: string, init: RequestInit = {}): Promise<T> {
     const token = await this.opts.getToken();
-    const res = await fetch(`${this.opts.baseUrl}${path}`, {
-      ...init,
-      headers: {
-        "content-type": "application/json",
-        ...(token ? { authorization: `Bearer ${token}` } : {}),
-        ...(init.headers ?? {}),
-      },
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
+    let res: Response;
+    try {
+      res = await fetch(`${this.opts.baseUrl}${path}`, {
+        ...init,
+        signal: init.signal ?? controller.signal,
+        headers: {
+          "content-type": "application/json",
+          ...(token ? { authorization: `Bearer ${token}` } : {}),
+          ...(init.headers ?? {}),
+        },
+      });
+    } catch (error) {
+      if (isNetworkError(error) || (error instanceof DOMException && error.name === "AbortError")) {
+        throw new ApiError(0, null, "Unable to reach the API. Please check that the backend is running and try again.");
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
 
     // Dispatch rate-limit event before throwing, so the UI can start
     // cooldown timers immediately.

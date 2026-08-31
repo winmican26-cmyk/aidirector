@@ -45,6 +45,7 @@ describe("analytics service", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   // ── Event tracking ──────────────────────────────────────────────────
@@ -162,6 +163,58 @@ describe("analytics service", () => {
   it("flush does not throw", async () => {
     analytics.track(ANALYTICS_EVENTS.PROJECT_STARTED);
     await expect(analytics.flush()).resolves.toBeUndefined();
+  });
+
+  it("delivers queued events to the backend and prunes them", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal("fetch", fetchMock);
+
+    analytics.configureBackend({
+      baseUrl: "https://api.example.com",
+      getToken: async () => "test-token",
+    });
+
+    analytics.track(ANALYTICS_EVENTS.PROJECT_STARTED, { page: "upload" });
+    // Let the fire-and-forget background send complete before flushing.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await analytics.flush();
+
+    // Delivered to the backend with auth header.
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("https://api.example.com/api/v1/analytics/events");
+    expect(init.headers.authorization).toBe("Bearer test-token");
+    const body = JSON.parse(init.body);
+    expect(body.event_name).toBe("project_started");
+    expect(body.properties).toEqual({ page: "upload" });
+
+    // Pruned from queue (memory + localStorage).
+    expect(analytics.getEvents()).toHaveLength(0);
+    expect(getStoredEvents()).toHaveLength(0);
+  });
+
+  it("keeps events queued when backend delivery fails", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
+
+    analytics.configureBackend({
+      baseUrl: "https://api.example.com",
+      getToken: async () => "test-token",
+    });
+
+    analytics.track(ANALYTICS_EVENTS.PROJECT_STARTED);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await analytics.flush();
+
+    // Not delivered → still queued for a later retry.
+    expect(analytics.getEvents()).toHaveLength(1);
+  });
+
+  it("does not prune events when no backend is configured", async () => {
+    analytics.track(ANALYTICS_EVENTS.PROJECT_STARTED);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await analytics.flush();
+
+    expect(analytics.getEvents()).toHaveLength(1);
   });
 
   // ── Error resilience ────────────────────────────────────────────────

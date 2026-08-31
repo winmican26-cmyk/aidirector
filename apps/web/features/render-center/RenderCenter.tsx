@@ -6,8 +6,11 @@ import { Badge } from "@/design-system/Badge";
 import { Button } from "@/design-system/Button";
 import { StatusDot } from "@/design-system/StatusDot";
 import { useJobView } from "@/hooks/useJobView";
+import { useApi } from "@/lib/api/runtime";
 import { formatBytes, formatRelativeTime, formatSeconds, shortenHash, shortenId } from "@/lib/format";
 import type { ExportArtifact, RenderJob, RenderOutput, RenderJobStatus } from "@/lib/api/types";
+import { downloadExport } from "@/services/export-download";
+import { toast } from "@/stores/toast-store";
 
 interface Props {
   jobId: string;
@@ -15,6 +18,7 @@ interface Props {
 
 export function RenderCenter({ jobId }: Props) {
   const { view, loading } = useJobView(jobId);
+  const { endpoints } = useApi();
 
   if (loading || !view) {
     return (
@@ -91,6 +95,14 @@ export function RenderCenter({ jobId }: Props) {
                         ? exportsByOutput.get(outputsByRenderJob.get(rj.id)!.id)
                         : undefined
                     }
+                    onDownload={async (outputId, filename) => {
+                      const ok = await downloadExport(endpoints, outputId, filename);
+                      if (ok) {
+                        toast.success("Download started", filename);
+                      } else {
+                        toast.error("Download unavailable", "Couldn't resolve a download link. Try again in a moment.");
+                      }
+                    }}
                   />
                 ))}
               </div>
@@ -118,10 +130,12 @@ function RenderRow({
   job,
   output,
   exportArtifact,
+  onDownload,
 }: {
   job: RenderJob;
   output?: RenderOutput;
   exportArtifact?: ExportArtifact;
+  onDownload: (outputId: string, filename?: string) => Promise<void>;
 }) {
   return (
     <div className="rounded-xl bg-[color:var(--color-surface-2)] border border-[color:var(--color-border-soft)] p-4 flex items-center gap-4">
@@ -160,7 +174,15 @@ function RenderRow({
             </Badge>
           )}
         </div>
-        <Button variant="secondary" size="sm" disabled={!exportArtifact}>
+        <Button
+          variant="secondary"
+          size="sm"
+          disabled={!exportArtifact}
+          onClick={() => {
+            if (!output || !exportArtifact) return;
+            void onDownload(output.id, exportArtifact.filename);
+          }}
+        >
           <Download className="h-3 w-3" /> Download
         </Button>
       </div>

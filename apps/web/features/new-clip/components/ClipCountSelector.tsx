@@ -31,7 +31,7 @@ export function ClipCountSelector({
 
   return (
     <section>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-[color:var(--color-text-primary)]">
         How many clips would you like?
       </h2>
       <div className="mt-4 flex items-center justify-center gap-6">
@@ -43,8 +43,8 @@ export function ClipCountSelector({
           className={cn(
             "flex h-12 w-12 items-center justify-center rounded-xl border-2 transition-all duration-200",
             value <= min
-              ? "border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed"
-              : "border-slate-200 bg-white text-slate-600 hover:border-emerald-300 hover:text-emerald-600 hover:shadow-sm",
+              ? "border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-1)] text-[color:var(--color-text-muted)] cursor-not-allowed"
+              : "border-[color:var(--color-border-strong)] bg-[color:var(--color-surface-2)] text-[color:var(--color-text-secondary)] hover:border-[color:var(--color-border-accent)] hover:text-[color:var(--color-accent-green)] hover:shadow-[var(--shadow-card-hover)]",
           )}
         >
           <AppIcon name="minus" size="md" strokeWidth={2} />
@@ -52,13 +52,13 @@ export function ClipCountSelector({
 
         <div className="flex flex-col items-center">
           <span
-            className="text-4xl font-bold text-slate-900 tabular-nums"
+            className="text-4xl font-bold text-[color:var(--color-text-primary)] tabular-nums"
             aria-live="polite"
             aria-atomic="true"
           >
             {value}
           </span>
-          <span className="text-sm text-slate-400 mt-0.5">clips</span>
+          <span className="text-sm text-[color:var(--color-text-tertiary)] mt-0.5">clips</span>
         </div>
 
         <button
@@ -69,8 +69,8 @@ export function ClipCountSelector({
           className={cn(
             "flex h-12 w-12 items-center justify-center rounded-xl border-2 transition-all duration-200",
             value >= max
-              ? "border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed"
-              : "border-slate-200 bg-white text-slate-600 hover:border-emerald-300 hover:text-emerald-600 hover:shadow-sm",
+              ? "border-[color:var(--color-border-soft)] bg-[color:var(--color-surface-1)] text-[color:var(--color-text-muted)] cursor-not-allowed"
+              : "border-[color:var(--color-border-strong)] bg-[color:var(--color-surface-2)] text-[color:var(--color-text-secondary)] hover:border-[color:var(--color-border-accent)] hover:text-[color:var(--color-accent-green)] hover:shadow-[var(--shadow-card-hover)]",
           )}
         >
           <AppIcon name="plus" size="md" strokeWidth={2} />

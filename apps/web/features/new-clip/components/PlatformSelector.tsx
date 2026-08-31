@@ -34,7 +34,7 @@ export function PlatformSelector({
 
   return (
     <section>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-[color:var(--color-text-primary)]">
         Where do you want to publish?
       </h2>
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -50,16 +50,16 @@ export function PlatformSelector({
               className={cn(
                 "flex items-center gap-4 rounded-2xl border-2 px-5 py-4 transition-all duration-200 text-left",
                 active
-                  ? "border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500/20"
-                  : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm",
+                  ? "border-[color:var(--color-accent-green)] bg-[color:var(--color-accent-green)]/10 ring-1 ring-[color:var(--color-accent-green)]/20"
+                  : "border-[color:var(--color-border-strong)] bg-[color:var(--color-surface-2)] hover:border-[color:var(--color-border-accent)] hover:shadow-[var(--shadow-card-hover)]",
               )}
             >
               <span
                 className={cn(
                   "flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 transition-colors",
                   active
-                    ? "border-emerald-500 bg-emerald-500 text-white"
-                    : "border-slate-300 bg-white",
+                    ? "border-[color:var(--color-accent-green)] bg-[color:var(--color-accent-green)] text-[color:var(--color-text-inverse)]"
+                    : "border-[color:var(--color-border-strong)] bg-[color:var(--color-surface-2)]",
                 )}
               >
                 {active && <AppIcon name="check" size="sm" strokeWidth={3} />}
@@ -67,7 +67,7 @@ export function PlatformSelector({
               <span
                 className={cn(
                   "text-base font-medium",
-                  active ? "text-slate-900" : "text-slate-700",
+                  active ? "text-[color:var(--color-text-primary)]" : "text-[color:var(--color-text-secondary)]",
                 )}
               >
                 {p.label}

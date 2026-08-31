@@ -34,16 +34,16 @@ const VARIANT_TAGS: Record<TypographyVariant, ElementType> = {
 };
 
 const VARIANT_CLASSES: Record<TypographyVariant, string> = {
-  hero: "text-[48px] font-bold leading-[1.1] tracking-tight text-slate-900",
+  hero: "text-[48px] font-bold leading-[1.1] tracking-tight text-[color:var(--color-text-primary)]",
   sectionTitle:
-    "text-[30px] font-bold leading-[1.2] tracking-tight text-slate-900",
-  title: "text-2xl font-semibold leading-[1.25] tracking-tight text-slate-900",
-  subtitle: "text-lg leading-[1.5] text-slate-500",
-  body: "text-base leading-[1.5] text-slate-700",
-  small: "text-sm leading-[1.4] text-slate-500",
-  caption: "text-xs leading-[1.3] text-slate-400",
+    "text-[30px] font-bold leading-[1.2] tracking-tight text-[color:var(--color-text-primary)]",
+  title: "text-2xl font-semibold leading-[1.25] tracking-tight text-[color:var(--color-text-primary)]",
+  subtitle: "text-lg leading-[1.5] text-[color:var(--color-text-secondary)]",
+  body: "text-base leading-[1.5] text-[color:var(--color-text-primary)]",
+  small: "text-sm leading-[1.4] text-[color:var(--color-text-secondary)]",
+  caption: "text-xs leading-[1.3] text-[color:var(--color-text-tertiary)]",
   overline:
-    "text-[11px] font-semibold leading-[1.2] tracking-[0.08em] uppercase text-slate-400",
+    "text-[11px] font-semibold leading-[1.2] tracking-[0.08em] uppercase text-[color:var(--color-text-tertiary)]",
 };
 
 /**

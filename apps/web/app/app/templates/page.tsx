@@ -8,6 +8,7 @@ import { Badge } from "@/design-system/Badge";
 import { Button } from "@/design-system/Button";
 import { useBriefTemplates, BriefTemplateCreate } from "@/hooks/useBriefTemplates";
 import { cn } from "@/lib/cn";
+import { toast } from "@/stores/toast-store";
 
 const SPORT_OPTIONS = ["football", "basketball", "tennis", "rugby", "cricket"];
 const STYLE_OPTIONS = ["ffmpeg_basic", "sports_hype", "documentary"];
@@ -53,6 +54,8 @@ export default function TemplatesPage() {
       setForm({ name: "", sport: "", render_style: "", caption_style: "", pacing: "", hook_phrases: [], tags: [] });
       setHookInput("");
       setTagInput("");
+    } catch (error) {
+      toast.error("Could not create template", error instanceof Error ? error.message : "Please try again.");
     } finally {
       setSaving(false);
     }

@@ -33,13 +33,13 @@ export const ProjectSummaryCard = memo(function ProjectSummaryCard({
           <AppIcon
             name="film"
             size="md"
-            className="text-emerald-500 shrink-0"
+            className="text-[color:var(--color-accent-green)] shrink-0"
           />
           <div className="min-w-0">
-            <Typography variant="caption" className="text-slate-400">
+            <Typography variant="caption" className="text-[color:var(--color-text-tertiary)]">
               Video
             </Typography>
-            <p className="text-sm font-medium text-slate-900 truncate">
+            <p className="text-sm font-medium text-[color:var(--color-text-primary)] truncate">
               {project.videoName}
             </p>
           </div>
@@ -50,37 +50,37 @@ export const ProjectSummaryCard = memo(function ProjectSummaryCard({
           <AppIcon
             name="clock"
             size="sm"
-            className="text-slate-400 shrink-0"
+            className="text-[color:var(--color-text-tertiary)] shrink-0"
           />
           <div>
-            <Typography variant="caption" className="text-slate-400">
+            <Typography variant="caption" className="text-[color:var(--color-text-tertiary)]">
               Uploaded
             </Typography>
-            <p className="text-sm text-slate-700">{project.uploadDate}</p>
+            <p className="text-sm text-[color:var(--color-text-secondary)]">{project.uploadDate}</p>
           </div>
         </div>
 
         {/* Clip count */}
         <div>
-          <Typography variant="caption" className="text-slate-400">
+          <Typography variant="caption" className="text-[color:var(--color-text-tertiary)]">
             Clips
           </Typography>
-          <p className="text-sm font-semibold text-slate-900">
+          <p className="text-sm font-semibold text-[color:var(--color-text-primary)]">
             {project.clipCount}
           </p>
         </div>
 
         {/* Processing time */}
         <div>
-          <Typography variant="caption" className="text-slate-400">
+          <Typography variant="caption" className="text-[color:var(--color-text-tertiary)]">
             Processing
           </Typography>
-          <p className="text-sm text-slate-700">{project.processingTime}</p>
+          <p className="text-sm text-[color:var(--color-text-secondary)]">{project.processingTime}</p>
         </div>
 
         {/* Platforms */}
         <div>
-          <Typography variant="caption" className="text-slate-400 mb-1">
+          <Typography variant="caption" className="text-[color:var(--color-text-tertiary)] mb-1">
             Platforms
           </Typography>
           <div className="flex flex-wrap gap-1">

@@ -90,7 +90,7 @@ export function BottomSheet({
         className={cn(
           // Mobile: fixed bottom sheet
           "fixed bottom-0 left-0 right-0 z-50",
-          "rounded-t-2xl bg-white border border-slate-200 shadow-xl",
+          "rounded-t-2xl bg-[color:var(--color-surface-2)] border border-[color:var(--color-border-strong)] shadow-[var(--shadow-elevated)]",
           "max-h-[85vh] overflow-y-auto",
           "transition-transform duration-300 motion-safe:transition-transform motion-safe:duration-300",
           // Desktop: right-side drawer
@@ -102,17 +102,17 @@ export function BottomSheet({
       >
         {/* Handle bar (mobile visual indicator) */}
         <div className="md:hidden flex justify-center pt-2 pb-1">
-          <div className="h-1 w-10 rounded-full bg-slate-300" />
+          <div className="h-1 w-10 rounded-full bg-[color:var(--color-text-muted)]" />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-          <h2 className="text-base font-semibold text-slate-900">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[color:var(--color-border-soft)]">
+          <h2 className="text-base font-semibold text-[color:var(--color-text-primary)]">
             {title}
           </h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            className="rounded-lg p-1.5 text-[color:var(--color-text-tertiary)] hover:text-[color:var(--color-text-primary)] hover:bg-[color:var(--color-surface-2)] transition-colors"
             aria-label="Close panel"
           >
             <AppIcon name="x" size="md" />

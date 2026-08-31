@@ -121,7 +121,7 @@ export function ConfirmationDialog({
       <div
         ref={dialogRef}
         className={cn(
-          "relative z-10 w-full max-w-md rounded-2xl bg-white border border-slate-200 shadow-xl p-6 transition-all duration-200",
+          "relative z-10 w-full max-w-md rounded-2xl bg-[color:var(--color-surface-2)] border border-[color:var(--color-border-strong)] shadow-[var(--shadow-elevated)] p-6 transition-all duration-200",
           "motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95",
           className,
         )}
@@ -131,8 +131,8 @@ export function ConfirmationDialog({
           className={cn(
             "h-12 w-12 rounded-xl flex items-center justify-center mb-4",
             variant === "danger"
-              ? "bg-red-50 text-red-500"
-              : "bg-emerald-50 text-emerald-500",
+              ? "bg-[color:var(--color-status-failed)]/10 text-[color:var(--color-status-failed)]"
+              : "bg-[color:var(--color-status-succeeded)]/10 text-[color:var(--color-status-succeeded)]",
           )}
         >
           {variant === "danger" ? (
@@ -145,7 +145,7 @@ export function ConfirmationDialog({
         {/* Title */}
         <h2
           id="dialog-title"
-          className="text-lg font-semibold text-slate-900 mb-1"
+          className="text-lg font-semibold text-[color:var(--color-text-primary)] mb-1"
         >
           {title}
         </h2>
@@ -153,7 +153,7 @@ export function ConfirmationDialog({
         {/* Message */}
         <p
           id="dialog-message"
-          className="text-sm text-slate-600 leading-relaxed mb-6"
+          className="text-sm text-[color:var(--color-text-secondary)] leading-relaxed mb-6"
         >
           {message}
         </p>
@@ -176,7 +176,7 @@ export function ConfirmationDialog({
             loading={loading}
             className={
               variant === "danger"
-                ? "!bg-red-500 !hover:bg-red-600 !active:bg-red-700"
+                ? "!bg-[color:var(--color-status-failed)] !hover:bg-[color:var(--color-status-failed)] !active:bg-[color:var(--color-status-failed)]"
                 : undefined
             }
           >

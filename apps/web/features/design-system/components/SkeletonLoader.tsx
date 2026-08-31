@@ -53,7 +53,7 @@ export function SkeletonLoader({
         <div
           key={i}
           className={cn(
-            "rounded-lg bg-slate-200",
+            "rounded-lg bg-[color:var(--color-surface-3)]",
             HEIGHT_MAP[height],
             orientation === "vertical" && "mb-3 last:mb-0",
           )}

@@ -84,7 +84,7 @@ class Analytics {
 
     this.events.push(event);
     this.persist();
-    void this.sendToBackend(event);
+    void this.sendAndPrune(event);
 
     if (process.env.NODE_ENV === "development") {
       console.log(`[Analytics] ${name}`, properties ?? "");
@@ -111,12 +111,19 @@ class Analytics {
     this.enabled = enabled;
   }
 
-  /** Flush events to a backend endpoint (stub for future use) */
+  /**
+   * Flush events to the backend. Only successfully-delivered events are
+   * pruned from the queue (memory + localStorage), so a repeat flush never
+   * re-sends events that already reached the server.
+   */
   async flush(): Promise<void> {
-    for (const event of this.events) await this.sendToBackend(event);
+    const snapshot = [...this.events];
+    for (const event of snapshot) {
+      await this.sendAndPrune(event);
+    }
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `[Analytics] Flush called — ${this.events.length} events queued`,
+        `[Analytics] Flush complete — ${this.events.length} events still queued`,
       );
     }
   }
@@ -137,12 +144,13 @@ class Analytics {
     }
   }
 
-  private async sendToBackend(event: AnalyticsEvent): Promise<void> {
-    if (!this.backend) return;
+  /** Send a single event to the backend. Returns true only on a delivered 2xx. */
+  private async sendToBackend(event: AnalyticsEvent): Promise<boolean> {
+    if (!this.backend) return false;
     try {
       const token = await this.backend.getToken();
-      if (!token) return;
-      await fetch(`${this.backend.baseUrl}/api/v1/analytics/events`, {
+      if (!token) return false;
+      const res = await fetch(`${this.backend.baseUrl}/api/v1/analytics/events`, {
         method: "POST",
         headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
         body: JSON.stringify({
@@ -152,8 +160,19 @@ class Analytics {
           properties: event.properties ?? {},
         }),
       });
+      return res.ok;
     } catch {
       // Analytics must never affect the product. Local persistence remains the fallback.
+      return false;
+    }
+  }
+
+  /** Send an event and remove it from the queue on success. */
+  private async sendAndPrune(event: AnalyticsEvent): Promise<void> {
+    const ok = await this.sendToBackend(event);
+    if (ok) {
+      this.events = this.events.filter((e) => e.eventId !== event.eventId);
+      this.persist();
     }
   }
 

@@ -24,27 +24,27 @@ const TONE_CONFIG: Record<
 > = {
   info: {
     icon: "info",
-    container: "bg-blue-50 border-blue-200",
-    text: "text-blue-900",
-    iconColor: "text-blue-500",
+    container: "bg-[color:var(--color-status-running)]/10 border-[color:var(--color-status-running)]/30",
+    text: "text-[color:var(--color-status-running)]",
+    iconColor: "text-[color:var(--color-status-running)]",
   },
   success: {
     icon: "checkCircle",
-    container: "bg-emerald-50 border-emerald-200",
-    text: "text-emerald-900",
-    iconColor: "text-emerald-500",
+    container: "bg-[color:var(--color-status-succeeded)]/10 border-[color:var(--color-status-succeeded)]/30",
+    text: "text-[color:var(--color-status-succeeded)]",
+    iconColor: "text-[color:var(--color-status-succeeded)]",
   },
   warning: {
     icon: "alertCircle",
-    container: "bg-amber-50 border-amber-200",
-    text: "text-amber-900",
-    iconColor: "text-amber-500",
+    container: "bg-[color:var(--color-status-warning)]/10 border-[color:var(--color-status-warning)]/30",
+    text: "text-[color:var(--color-status-warning)]",
+    iconColor: "text-[color:var(--color-status-warning)]",
   },
   error: {
     icon: "alertCircle",
-    container: "bg-red-50 border-red-200",
-    text: "text-red-900",
-    iconColor: "text-red-500",
+    container: "bg-[color:var(--color-status-failed)]/10 border-[color:var(--color-status-failed)]/30",
+    text: "text-[color:var(--color-status-failed)]",
+    iconColor: "text-[color:var(--color-status-failed)]",
   },
 };
 
@@ -102,7 +102,7 @@ export function InfoBanner({
           className={cn(
             "shrink-0 rounded-lg p-1 transition-colors",
             config.text,
-            "hover:bg-black/5",
+            "hover:bg-white/10",
           )}
           aria-label="Dismiss"
         >

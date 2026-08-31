@@ -9,11 +9,11 @@ interface BadgeProps {
 }
 
 const VARIANT_CLASSES = {
-  default: "bg-slate-100 text-slate-600 border-slate-200",
-  success: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  warning: "bg-amber-50 text-amber-700 border-amber-200",
-  error: "bg-red-50 text-red-700 border-red-200",
-  info: "bg-blue-50 text-blue-700 border-blue-200",
+  default: "bg-[color:var(--color-surface-2)] text-[color:var(--color-text-secondary)] border-[color:var(--color-border-strong)]",
+  success: "bg-[color:var(--color-status-succeeded)]/10 text-[color:var(--color-status-succeeded)] border-[color:var(--color-status-succeeded)]/30",
+  warning: "bg-[color:var(--color-status-warning)]/10 text-[color:var(--color-status-warning)] border-[color:var(--color-status-warning)]/30",
+  error: "bg-[color:var(--color-status-failed)]/10 text-[color:var(--color-status-failed)] border-[color:var(--color-status-failed)]/30",
+  info: "bg-[color:var(--color-status-running)]/10 text-[color:var(--color-status-running)] border-[color:var(--color-status-running)]/30",
 };
 
 /**

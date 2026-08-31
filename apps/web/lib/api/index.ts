@@ -8,6 +8,8 @@ export type {
   DirectorPlanEnvelope,
 } from "./endpoints";
 
+export type { ExportUrl } from "./types";
+
 export type {
   AspectRatio,
   CaptionStyle,
