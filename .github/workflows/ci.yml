@@ -130,6 +130,48 @@ jobs:
           NEXT_PUBLIC_API_URL: http://localhost:8000
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ZW5kbGVzcy1wb2xsaXdvZy0wLmNsZXJrLmFjY291bnRzLmRldiQ
 
+  # ─── Playwright smoke E2E ────────────────────────────────────────────────
+  e2e-smoke:
+    name: E2E smoke (Playwright)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      # Only the unauthenticated smoke spec runs here. authenticated-workflows
+      # and football-real self-skip without E2E_AUTH_STATE / real media, which
+      # are not available to CI.
+      - name: Run smoke spec
+        run: pnpm exec playwright test e2e/smoke.spec.ts --project=chromium
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ZW5kbGVzcy1wb2xsaXdvZy0wLmNsZXJrLmFjY291bnRzLmRldiQ
+
+      - name: Upload traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: apps/web/test-results/
+          retention-days: 7
+
   # ─── Lighthouse CI ────────────────────────────────────────────────────────
   lighthouse:
     name: Lighthouse CI (performance regression)
